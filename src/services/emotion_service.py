@@ -12,8 +12,8 @@ idx_to_emotion = {
     5: "surprise",
 }
 nlp = en_core_web_lg.load()
-model = RNN(300, h, output_dim=len(emotion_to_idx), num_layers=3, dropout=0.1)
-model.load_model("rnn_fixed.pth")
+model = RNN(300, 100, output_dim=len(idx_to_emotion), num_layers=3, dropout=0.1)
+model.load_model("services/rnn_fixed.pth")
 
 def status_preprocessor(status):
     word_embeddings = []

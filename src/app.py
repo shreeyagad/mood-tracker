@@ -63,14 +63,14 @@ def create_app():
         db.session.commit()
         return success_response(emotion.serialize())
 
-    @app.route("/api/emotion/<int:emotion_id>/", methods=["PUT"])
+    @app.route("/api/emotions/<int:emotion_id>/", methods=["PUT"])
     def update_emotion(emotion_id):
         emotion = Emotion.query.filter_by(id=emotion_id).first()
         if emotion is None:
             return failure_response("Emotion not found")
         body = json.loads(request.data)
-        status = body.get("status", emotion.status)
-        emotion.status = emotion_service.classify_status(status)
+        status = body.get("status")
+        emotion.emotion_id = emotion_service.classify_status(status)
         db.session.commit()
         return success_response(emotion.serialize())
 
