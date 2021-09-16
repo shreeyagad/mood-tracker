@@ -1,33 +1,36 @@
-from gensim import downloader
+import spacy
+import en_core_web_lg
 import torch
 from services.rnn import RNN
 
-emotion_to_idx = {
-    "anger": 0,
-    "fear": 1,
-    "joy": 2,
-    "love": 3,
-    "sadness": 4,
-    "surprise": 5,
+idx_to_emotion = {
+    0: "anger",
+    1: "fear",
+    2: "joy",
+    3: "love",
+    4: "sadness",
+    5: "surprise",
 }
-# glove_vectors = downloader.load('glove-twitter-200')
-model = RNN(200, 100, len(emotion_to_idx))
-# model.load_model("rnn_fixed.pth")
-
+nlp = en_core_web_lg.load()
+model = RNN(300, h, output_dim=len(emotion_to_idx), num_layers=3, dropout=0.1)
+model.load_model("rnn_fixed.pth")
 
 def status_preprocessor(status):
     word_embeddings = []
-    for word in status:
-        try:
-            word_embeddings.append(glove_vectors[word])
-        except:
-            word_embeddings.append(glove_vectors["the"])
+    doc = nlp(status)
+    num_words = len(status.split(" "))
+    for w in range(num_words):
+        word_embeddings.append(doc[w].vector)
     return word_embeddings
 
 def classify_status(status):
-    # vec_in = status_preprocessor(status)
-    # model_output = model(torch.Tensor(vec_in).unsqueeze(0)).cpu().squeeze(0)
-    # predicted = int(torch.argmax(model_output))
-    # return predicted
-    return len(status)
+    vec_in = status_preprocessor(status)
+    lengths = torch.Tensor([len(vec_in)])
+    
+    model_output = model(torch.Tensor(vec_in).unsqueeze(0), lengths).cpu()
+    last_h = model_output[:,(len(vec_in)-1),:]
+
+    output_loss = model.softmax(model.W(last_h))
+    temp, predicted = torch.max(output_loss, 1)
+    return int(predicted.squeeze())
 

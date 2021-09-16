@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 import datetime
 from datetime import date
+from services.emotion_service import idx_to_emotion
 
 db = SQLAlchemy()
 
@@ -20,6 +21,7 @@ class Emotion(db.Model):
         return {
             'id': self.id,
             'emotion_id': self.emotion_id,
+            'emotion': idx_to_emotion[self.emotion_id],
             'user_id': self.user_id,
             'date': str(self.date)
         }

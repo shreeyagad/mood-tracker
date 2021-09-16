@@ -1,5 +1,7 @@
 import json 
 
+test_joy_status = "Today was a great day! I got coffee from my favorite cafe on campus, Gimme Coffee, and then I met some friends for lunch at Terrace."
+
 def test_get_emotions(app):
     with app.test_client() as client:
         res = client.get("/api/emotions/")
@@ -12,7 +14,7 @@ def test_create_emotion(app):
         res = client.post(
             '/api/emotions/',
             data=json.dumps(dict(
-                status="Today was a very boring day.",
+                status=test_joy_status,
                 user_id=1
             )),
             content_type='application/json',
@@ -21,7 +23,8 @@ def test_create_emotion(app):
             "success": True, 
             "data": {
                 "id": 1, 
-                "emotion_id": 28, 
+                "emotion_id": 2,
+                "emotion": "joy", 
                 "user_id": 1, 
                 "date": "2021-09-15"
             }
@@ -35,7 +38,7 @@ def test_delete_emotion(app):
         client.post(
             '/api/emotions/',
             data=json.dumps(dict(
-                status="Today was a very boring day.",
+                status=test_joy_status,
                 user_id=1
             )),
             content_type='application/json',
@@ -48,7 +51,8 @@ def test_delete_emotion(app):
             "success": True, 
             "data": {
                 "id": 1, 
-                "emotion_id": 28, 
+                "emotion_id": 2, 
+                "emotion": "joy",
                 "user_id": 1, 
                 "date": "2021-09-15"
             }
