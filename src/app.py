@@ -28,18 +28,22 @@ def create_app():
 
     # your routes here
 
-    @app.route("/api/emotions/<int:emotion_id>/")
+    @app.route("/")
+    def home():
+        return "Hello World"
+
+    @app.route("/emotions/<int:emotion_id>/")
     def get_emotion(emotion_id):
         emotion = Emotion.query.filter_by(id=emotion_id).first()
         if emotion is None:
             return failure_response("Emotion not found")
         return success_response(emotion.serialize())
 
-    @app.route("/api/emotions/")
+    @app.route("/emotions/")
     def get_emotions():
         return success_response([e.serialize() for e in Emotion.query.all()])
 
-    @app.route("/api/emotions/", methods=["POST"])
+    @app.route("/emotions/", methods=["POST"])
     def create_emotion():
         body = json.loads(request.data)
         status = body.get("status")
@@ -54,7 +58,7 @@ def create_app():
         db.session.commit()
         return success_response(new_emotion.serialize(), 201)
 
-    @app.route("/api/emotions/<int:emotion_id>/", methods=["DELETE"])
+    @app.route("/emotions/<int:emotion_id>/", methods=["DELETE"])
     def delete_emotion(emotion_id):
         emotion = Emotion.query.filter_by(id=emotion_id).first()
         if emotion is None:
@@ -63,7 +67,7 @@ def create_app():
         db.session.commit()
         return success_response(emotion.serialize())
 
-    @app.route("/api/emotions/<int:emotion_id>/", methods=["PUT"])
+    @app.route("/emotions/<int:emotion_id>/", methods=["PUT"])
     def update_emotion(emotion_id):
         emotion = Emotion.query.filter_by(id=emotion_id).first()
         if emotion is None:
@@ -74,19 +78,19 @@ def create_app():
         db.session.commit()
         return success_response(emotion.serialize())
 
-    @app.route("/api/users/")
+    @app.route("/users/")
     def get_users():
         users = [u.serialize() for u in User.query.all()]
         return success_response(users)
 
-    @app.route("/api/users/<int:user_id>/")
+    @app.route("/users/<int:user_id>/")
     def get_user(user_id):
         user = User.query.filter_by(id=user_id).first()
         if user is None:
             return failure_response("User not found")
         return success_response(user.serialize())
 
-    @app.route("/api/users/", methods=["POST"])
+    @app.route("/users/", methods=["POST"])
     def create_user():
         body = json.loads(request.data)
         username = body.get("username")
@@ -101,7 +105,7 @@ def create_app():
         db.session.commit()
         return success_response(new_user.serialize(), 201)
 
-    @app.route("/api/users/<int:user_id>/", methods=["DELETE"])
+    @app.route("/users/<int:user_id>/", methods=["DELETE"])
     def delete_user(user_id):
         user = User.query.filter_by(id=user_id).first()
         if user is None:
