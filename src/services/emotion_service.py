@@ -1,5 +1,5 @@
 import spacy
-import en_core_web_lg
+import en_core_web_md
 import torch
 from services.rnn import RNN
 
@@ -11,7 +11,7 @@ idx_to_emotion = {
     4: "sadness",
     5: "surprise",
 }
-nlp = en_core_web_lg.load()
+nlp = en_core_web_md.load()
 model = RNN(300, 100, output_dim=len(idx_to_emotion), num_layers=3, dropout=0.1)
 model.load_model("services/rnn_fixed.pth")
 
