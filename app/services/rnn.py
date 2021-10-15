@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 class RNN(nn.Module):
-	def __init__(self, input_size, h, num_layers, output_dim, dropout):
+	def __init__(self, input_size, h, num_layers, output_dim, dropout): # Add relevant parameters
 		super(RNN, self).__init__()
 		self.rnn = nn.RNN(input_size=input_size, hidden_size=h, num_layers=num_layers, nonlinearity='relu',
 		                  batch_first=True, dropout=dropout)
@@ -15,7 +15,7 @@ class RNN(nn.Module):
 		self.softmax = nn.LogSoftmax(dim=1)
 		self.loss = nn.NLLLoss()
 		
-	def compute_loss(self, predictions, gold_label):
+	def compute_Loss(self, predictions, gold_label):
 		loss = self.loss(predictions, gold_label)	
 		return loss
 	
@@ -23,7 +23,9 @@ class RNN(nn.Module):
 		packed_inputs = pack_padded_sequence(inputs, lengths, batch_first=True, 
 		                                     enforce_sorted=False)
 		packed_out, _ = self.rnn(packed_inputs)
+  
 		unpacked_out, _ = pad_packed_sequence(packed_out, batch_first=True)
+    
 		return unpacked_out
 
 	def load_model(self, save_path):

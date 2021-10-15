@@ -4,15 +4,15 @@ import torch
 from services.rnn import RNN
 
 idx_to_emotion = {
-    0: "anger",
-    1: "fear",
-    2: "joy",
-    3: "love",
-    4: "sadness",
-    5: "surprise",
+    0: "Anger",
+    1: "Fear",
+    2: "Joy",
+    3: "Love",
+    4: "Sadness",
+    5: "Surprise",
 }
 nlp = en_core_web_md.load()
-model = RNN(300, 100, output_dim=len(idx_to_emotion), num_layers=3, dropout=0.1)
+model = RNN(input_size=300, h=100, num_layers=1, output_dim=len(idx_to_emotion), dropout=0.1)
 model.load_model("services/rnn_fixed.pth")
 
 def status_preprocessor(status):
