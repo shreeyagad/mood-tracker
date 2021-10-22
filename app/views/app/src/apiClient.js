@@ -25,10 +25,14 @@ class APIClient {
   }
 
   getUserData() {
-    // need to add code here that returns the user's name, email address, and how long
-    // they've been using mood tracker
-    // look into okta self registration feature (user should be able to change their password)
-    return 0;
+    return this.perform('get', '/user/');
+  }
+
+  dateExists() {
+    let date = new Date();
+    let dateObjects = [date.getFullYear(), date.getMonth()+1,  date.getDate()];
+    let dateString = dateObjects.join('-');
+    return this.perform('get', `/emotions/${dateString}/`);
   }
 
   async perform (method, resource, data) {
@@ -40,7 +44,7 @@ class APIClient {
         Authorization: `Bearer ${this.accessToken}`
       }
     }).then(resp => {
-      return resp.data ? resp.data : [];
+      return resp.data ? resp.data : resp.error;
     })
   }
 }

@@ -27,6 +27,7 @@ class Profile extends React.Component {
         this.apiClient.getUserData().then((data) =>
             this.setState({...this.state, userData: data.data})
         );
+        console.log(this.state.userData);
     }
 
     render() {
@@ -34,7 +35,7 @@ class Profile extends React.Component {
         <div className={styles.root}>
             <Container>
             <EmotionNav></EmotionNav>
-            <h1>Profile</h1>
+            <h1>{this.state.userData}</h1>
             </Container>
         </div>
         )

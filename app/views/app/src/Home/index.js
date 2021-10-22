@@ -1,20 +1,26 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Button from 'react-bootstrap/Button';
+import Alert from 'react-bootstrap/Alert';
 import Grid from '@material-ui/core/Grid';
+import Row from 'react-bootstrap/Row';
 import { withOktaAuth } from '@okta/okta-react';
 import Emotion from "../Emotion"
 import EmotionForm from "../EmotionForm"
 import Container from 'react-bootstrap/Container';
 import APIClient from '../apiClient';
 import EmotionNav from "../EmotionNav";
+import { BlinkingCursorTextBuilder } from 'react-animated-text-builders';
 
 const styles = theme => ({
   root: {
     flexGrow: 1,
     marginTop: 70
   },
+  ml3: {
+    fontWeight: 900,
+    fontSize: 3.5
+  }
 });
 
 class Home extends React.Component {
@@ -24,50 +30,47 @@ class Home extends React.Component {
       value: 0,
       emotions: [],
       apiClient: null,
+      show: false,
     };
   }
 
   componentDidMount() {
     const accessToken = this.props.authState.accessToken.accessToken;
     const apiClient = new APIClient(accessToken);
-    this.setState({ apiClient });
+    this.setState({ apiClient: apiClient });
     apiClient.getEmotions().then((data) =>
       this.setState({...this.state, emotions: data.data})
     );
   }
 
-  updateState = (emotion) => {
-    this.state.apiClient.getEmotions().then((data) =>
-      this.setState({...this.state, emotions: data.data})
-    );
+  showAlert = () => {
+    this.setState({show: true});
   }
-  
-  renderEmotions = (emotions) => {
-    if (!emotions) { return [] }
-    return emotions.map((emotion) => {
-      return (
-        <Grid item xs={12} md={3} key={emotion.id}>
-          <Emotion updateState={this.updateState} emotion={emotion} apiClient={this.state.apiClient} />
-        </Grid>
-      );
-    })
-  }
-  
-  logout = (e) => {
-    e.preventDefault();
-    this.props.oktaAuth.signOut();
+
+  hideAlert = () => {
+    this.setState({show: false});
   }
 
   render() {
     return (
       <div className={styles.root}>
         <Container>
-          <EmotionNav></EmotionNav>
-          <Grid container spacing={10} style={{padding: '20px 0'}}>
-              { this.renderEmotions(this.state.emotions) }
-          </Grid>
-          <EmotionForm apiClient={this.state.apiClient}/>
-          <Button onClick={this.logout}></Button>
+          <EmotionNav oktaAuth={this.props.oktaAuth}></EmotionNav>
+          <BlinkingCursorTextBuilder
+            textStyle={{fontWeight :"bold", fontSize : "50px"}}
+            style={{marginTop:"200px", marginBottom :"10px"}}
+            cursorComponent={<div>|</div>}
+            blinkTimeAfterFinish={-1}>Welcome  to  Mood  Tracker
+          </BlinkingCursorTextBuilder>
+          <h4 style={{textAlign: 'center', paddingTop: 20, color: 'grey'}}>Enter your daily status below.</h4>
+
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+          <Row>
+          <EmotionForm showAlert={this.showAlert} apiClient={this.state.apiClient}/>
+          <Alert style={{marginBottom: 50, backgroundColor: 'transparent', border: 'transparent'}} show={this.state.show} variant="danger" onClose={() => this.hideAlert()}>
+              You already entered a status for today.
+          </Alert>
+          </Row>
         </Container>
       </div>
     )
