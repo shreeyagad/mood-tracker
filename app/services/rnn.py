@@ -12,7 +12,8 @@ class RNN(nn.Module):
 		self.W = nn.Linear(h, output_dim)
 		self.output_dim = output_dim
 
-		self.softmax = nn.LogSoftmax(dim=1)
+		self.logSoftmax = nn.LogSoftmax(dim=1)
+		self.softmax = nn.Softmax(dim=1)
 		self.loss = nn.NLLLoss()
 		
 	def compute_Loss(self, predictions, gold_label):

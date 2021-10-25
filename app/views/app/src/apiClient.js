@@ -20,20 +20,20 @@ class APIClient {
     return this.perform('delete', `/emotions/${emotion_id}/`);
   }
 
-  getEmotions() {
-    return this.perform('get', '/emotions/');
+  getEmotions(dateString) {
+    return this.perform('get', `/emotions/${dateString}/`);
   }
 
   getUserData() {
     return this.perform('get', '/user/');
   }
 
-  dateExists() {
-    let date = new Date();
-    let dateObjects = [date.getFullYear(), date.getMonth()+1,  date.getDate()];
-    let dateString = dateObjects.join('-');
-    return this.perform('get', `/emotions/${dateString}/`);
-  }
+  // dateExists() {
+  //   let date = new Date();
+  //   let dateObjects = [date.getFullYear(), date.getMonth()+1,  date.getDate()];
+  //   let dateString = dateObjects.join('-');
+  //   return this.perform('get', `/emotions/${dateString}/`);
+  // }
 
   async perform (method, resource, data) {
     return client({

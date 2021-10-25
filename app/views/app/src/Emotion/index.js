@@ -3,14 +3,16 @@ import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Row from 'react-bootstrap/Row';
 import Modal from 'react-bootstrap/Modal';
+import PieChart from "../PieChart";
+import Container from 'react-bootstrap/Container';
 
 let emotionToColor = {
-  "Anger": "Salmon",
-  "Fear": "SandyBrown",
-  "Joy": "Thistle",
-  "Love": "PeachPuff",
-  "Sadness": "SkyBlue",
-  "Surprise": "PaleGreen",
+  "Anger": "#f47560",
+  "Fear": "#e8c1a0",
+  "Joy": "#f1e15b",
+  "Love": "#e8a838",
+  "Sadness": "#61cdbb",
+  "Surprise": "#97e3d5",
 }
 
 class Emotion extends React.Component {
@@ -21,6 +23,46 @@ class Emotion extends React.Component {
     }
     this.handleClick = this.handleClick.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
+    function roundToTwo(num) {return +(Math.round(num + "e+2")  + "e-2");}
+    function transformNum(num) {return parseFloat(num).toFixed(2)}
+    this.emotionData = [
+      {
+        "id": "Anger",
+        "label": "Anger",
+        "value": transformNum(this.props.emotion.emotion_data["Anger"]),
+        "color": "hsl(169, 70%, 50%)",
+      },
+      {
+        "id": "Fear",
+        "label": "Fear",
+        "value": transformNum(this.props.emotion.emotion_data["Fear"]),
+        "color": "hsl(235, 70%, 50%)"
+      },
+      {
+        "id": "Joy",
+        "label": "Joy",
+        "value": transformNum(this.props.emotion.emotion_data["Joy"]),
+        "color": "hsl(191, 70%, 50%)"
+      },
+      {
+        "id": "Love",
+        "label": "Love",
+        "value": transformNum(this.props.emotion.emotion_data["Love"]),
+        "color": "hsl(194, 70%, 50%)"
+      },
+      {
+        "id": "Sadness",
+        "label": "Sadness",
+        "value": transformNum(this.props.emotion.emotion_data["Sadness"]),
+        "color": "hsl(186, 70%, 50%)"
+      },
+      {
+        "id": "Surprise",
+        "label": "Surprise",
+        "value": transformNum(this.props.emotion.emotion_data["Surprise"]),
+        "color": "hsl(100, 70%, 50%)"
+      }
+    ];
 }
   handleClick(event) {
     this.setState({
@@ -30,50 +72,11 @@ class Emotion extends React.Component {
 
   handleDelete(event) {
     this.props.apiClient.deleteEmotion(this.props.emotion.id);
-    this.props.updateState(); 
     this.props.updateState();
   }
 
-  // data = [
-  //   {
-  //     "id": "anger",
-  //     "label": "anger",
-  //     "value": this.props.emotion.anger,
-  //     "color": "hsl(215, 70%, 50%)"
-  //   },
-  //   {
-  //     "id": "fear",
-  //     "label": "fear",
-  //     "value": 533,
-  //     "color": "hsl(59, 70%, 50%)"
-  //   },
-  //   {
-  //     "id": "joy",
-  //     "label": "Joy",
-  //     "value": 35,
-  //     "color": "hsl(127, 70%, 50%)"
-  //   },
-  //   {
-  //     "id": "sadness",
-  //     "label": "Sadness",
-  //     "value": 505,
-  //     "color": "hsl(295, 70%, 50%)"
-  //   },
-  //   {
-  //     "id": "love",
-  //     "label": "Love",
-  //     "value": 108,
-  //     "color": "hsl(229, 70%, 50%)"
-  //   },
-  //   {
-  //     "id": "surprise",
-  //     "label": "Surprise",
-  //     "value": 108,
-  //     "color": "hsl(229, 70%, 50%)"
-  //   }
-  // ]
-
   render() {
+    console.log((this.props.emotion.emotion_data));
     return (
       <Card style={{background: emotionToColor[this.props.emotion.emotion], width: '18rem'}}>
         <Card.Header>
@@ -94,7 +97,7 @@ class Emotion extends React.Component {
             {this.props.emotion.emotion}
           </Card.Title>
           <Card.Text style={{display: 'flex', justifyContent: 'center'}}>
-          {this.props.emotion.status.slice(0,30) + "..."}
+          <p>{this.props.emotion.status.slice(0,30) + "..."}</p>
             </Card.Text>
           <Modal
             centered
@@ -107,7 +110,8 @@ class Emotion extends React.Component {
               </Modal.Header>
               <Modal.Body>
               <Modal.Title style={{color: emotionToColor[this.props.emotion.emotion], textAlign: 'center', marginBottom: 20}}>You felt {this.props.emotion.emotion}.</Modal.Title>
-                {this.props.emotion.status}
+                <p>{this.props.emotion.status}</p>
+                <Container style={{height: 400}}><PieChart data={this.emotionData}/></Container>
               </Modal.Body>
             </Modal>
         </Card.Body>

@@ -1,9 +1,10 @@
 import { ResponsivePie } from '@nivo/pie'
 
-const PieChart = ({ data }) => (
+function PieChart(props) {
+    return (
     <ResponsivePie
-        data={data}
-        margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+        data={props.data}
+        margin={{ top: 40, right: 80, bottom: 80, left: 40 }}
         innerRadius={0.5}
         padAngle={0.7}
         cornerRadius={3}
@@ -39,62 +40,50 @@ const PieChart = ({ data }) => (
         fill={[
             {
                 match: {
-                    id: 'ruby'
+                    id: 'Fear'
                 },
                 id: 'dots'
             },
             {
                 match: {
-                    id: 'c'
+                    id: 'Joy'
                 },
                 id: 'dots'
             },
             {
                 match: {
-                    id: 'go'
+                    id: 'Surprise'
                 },
                 id: 'dots'
             },
             {
                 match: {
-                    id: 'python'
+                    id: 'Love'
                 },
                 id: 'dots'
             },
             {
                 match: {
-                    id: 'scala'
+                    id: 'Anger'
                 },
                 id: 'lines'
             },
             {
                 match: {
-                    id: 'lisp'
+                    id: 'Sadness'
                 },
                 id: 'lines'
             },
-            {
-                match: {
-                    id: 'elixir'
-                },
-                id: 'lines'
-            },
-            {
-                match: {
-                    id: 'javascript'
-                },
-                id: 'lines'
-            }
         ]}
         legends={[
             {
                 anchor: 'bottom',
-                direction: 'row',
+                direction: 'column',
                 justify: false,
-                translateX: 0,
-                translateY: 56,
-                itemsSpacing: 0,
-                itemWidth: 100,
+                translateX: 200,
+                translateY: -150,
+                itemsSpacing: 5,
+                itemWidth: 65,
                 itemHeight: 18,
                 itemTextColor: '#999',
                 itemDirection: 'left-to-right',
@@ -112,5 +101,6 @@ const PieChart = ({ data }) => (
             }
         ]}
     />
-)
+    )
+}
 export default PieChart;

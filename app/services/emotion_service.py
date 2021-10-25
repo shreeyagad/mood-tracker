@@ -31,6 +31,7 @@ def classify_status(status):
     last_h = model_output[:,(len(vec_in)-1),:]
 
     output_loss = model.softmax(model.W(last_h))
-    temp, predicted = torch.max(output_loss, 1)
-    return int(predicted.squeeze())
+    _, predicted = torch.max(output_loss, dim=1)
+    predicted = int(predicted.squeeze())
+    return predicted, output_loss.squeeze()
 

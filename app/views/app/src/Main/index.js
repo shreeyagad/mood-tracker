@@ -5,7 +5,7 @@ import { OktaAuth, toRelativeUrl } from '@okta/okta-auth-js';
 import Login from '../Login'
 import Home from '../Home'
 import Data from '../Data'
-import Profile from '../Profile'
+import Statistics from '../Statistics';
 
 class Main extends Component {
   
@@ -29,7 +29,7 @@ class Main extends Component {
           <Route path="/callback" component={LoginCallback} />
           <SecureRoute path="/home" component={Home} />
           <SecureRoute path="/data" component={Data} />
-          <SecureRoute path="/profile" component={Profile} />
+          <SecureRoute path="/statistics" component={Statistics} />
         </Switch>
       </Security>
     );

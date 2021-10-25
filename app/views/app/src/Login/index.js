@@ -4,6 +4,7 @@ import { Redirect } from 'react-router-dom'
 import { withOktaAuth } from '@okta/okta-react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
+import { BlinkingCursorTextBuilder } from 'react-animated-text-builders';
 
 class Login extends React.Component {
   constructor(props) {
@@ -21,9 +22,16 @@ class Login extends React.Component {
     } else {
       return (
         <Container>
-          <div style={{height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-            <h1 style={{fontSize: 50, position: "absolute", top:"350px"}}>Welcome to Mood Tracker!</h1>
-            <Button size="lg" style={{position: "relative", top:"50px", border: "black", background: "grey"}} onClick={this.login}>Login with Okta</Button>
+          <div style={{marginTop: 300, alignItems: 'center', justifyContent: 'center'}}>
+            <BlinkingCursorTextBuilder
+            textStyle={{fontWeight :"bold", fontSize : "50px"}}
+            style={{marginBottom :"10px"}}
+            cursorComponent={<div>|</div>}
+            blinkTimeAfterFinish={-1}>Welcome  to  Mood  Tracker
+            </BlinkingCursorTextBuilder>
+          </div>
+          <div style={{textAlign: 'center', alignItems: 'center', justifyContent: 'center'}}>
+            <Button style={{marginTop: 20}} size="lg" variant="light" onClick={this.login}>Login with Okta</Button>
           </div>
         </Container>
       )

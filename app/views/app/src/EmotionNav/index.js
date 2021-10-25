@@ -20,6 +20,7 @@ class EmotionNav extends React.Component {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
               <Nav.Link href="/data">Data</Nav.Link>
+              <Nav.Link href="/statistics">Statistics</Nav.Link>
               {/* <Nav.Link href="/profile">Profile</Nav.Link> */}
               {/* <Nav.Link href="/about">About</Nav.Link> */}
             </Nav>

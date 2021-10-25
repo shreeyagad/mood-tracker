@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from services.emotion_service import idx_to_emotion
+import datetime
+from datetime import date
 
 db = SQLAlchemy()
 
@@ -10,18 +12,26 @@ class Emotion(db.Model):
     user_id = db.Column(db.Integer, nullable=False)
     date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(500), nullable=False)
+    
+    emotion_data = db.relationship(
+        'EmotionData', 
+        backref='emotion', 
+        lazy=True, 
+        uselist=False,
+        cascade="delete"
+        )
 
     def __init__(self, **kwargs):
         self.emotion_id = kwargs.get('emotion_id')
         self.status = kwargs.get('status')
         self.user_id = kwargs.get('user_id')
-        self.date = kwargs.get('date')
+        self.date = date.today()
     
     def serialize(self):
         return {
             'id': self.id,
-            'emotion_id': self.emotion_id,
             'emotion': idx_to_emotion[self.emotion_id],
+            'emotion_data': self.emotion_data.serialize(),
             'status': self.status,
             'user_id': self.user_id,
             'date': str(self.date)
@@ -33,8 +43,44 @@ class Emotion(db.Model):
 
     @staticmethod
     def get_by_date(date, user_id):
-        return Emotion.query.filter_by(date=date, user_id=user_id).first()
+        return Emotion.query.filter_by(date=date, user_id=user_id)
     
     @staticmethod
     def get_all(user_id):
         return Emotion.query.filter_by(user_id=user_id)
+
+
+class EmotionData(db.Model):
+    __tablename__ = "emotionData"
+    id = db.Column(db.Integer, primary_key=True)
+    emotion_id = db.Column(db.Integer, db.ForeignKey("emotion.id"), nullable=False)
+
+    # emotions
+    anger = db.Column(db.Float, nullable=False)
+    fear = db.Column(db.Float, nullable=False)
+    surprise = db.Column(db.Float, nullable=False)
+    sadness = db.Column(db.Float, nullable=False)
+    joy = db.Column(db.Float, nullable=False)
+    love = db.Column(db.Float, nullable=False)
+
+    def __init__(self, emotion_id, emotion_data):
+        self.emotion_id = emotion_id
+
+        self.anger = emotion_data[0]
+        self.fear = emotion_data[1]
+        self.joy = emotion_data[2]
+        self.love = emotion_data[3]
+        self.sadness = emotion_data[4]
+        self.surprise = emotion_data[5]
+    
+    def serialize(self):
+        return {
+            "Anger": self.anger,
+            "Fear": self.fear,
+            "Surprise": self.surprise,
+            "Sadness": self.sadness,
+            "Joy": self.joy,
+            "Love": self.love
+        }
+
+

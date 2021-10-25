@@ -6,7 +6,6 @@ class EmotionForm extends React.Component {
         super(props);
         this.state = {
             value: '',
-            error: '',
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -20,21 +19,22 @@ class EmotionForm extends React.Component {
     handleSubmit(event) {
         event.preventDefault();
         this.props.apiClient.createEmotion({"status": this.state.value});
-        const date = async () => {  
-            await this.props.apiClient.dateExists();
-        }; 
-        date().then(() => {  
-            this.props.showAlert();
-        }).catch((error) => {  
-            this.props.apiClient.createEmotion({"status": this.state.value});
-        });
+        event.target.reset();
+        // const date = async () => {  
+        //     await this.props.apiClient.dateExists();
+        // }; 
+        // date().then(() => {  
+        //     this.props.showAlert();
+        // }).catch((error) => {  
+        //     this.props.apiClient.createEmotion({"status": this.state.value});
+        //     event.target.reset();
+        // });
     }
 
     render() {
         return (
-        <Form onSubmit={this.handleSubmit} style={{marginTop: 50}}>
+        <Form id='myForm' onSubmit={this.handleSubmit} style={{marginTop: 50}}>
             <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                {/* <Form.Label>Enter your status for today!</Form.Label> */}
                 <Form.Control as="textarea" rows={3} onChange={this.handleChange}/>
             </Form.Group>
             <Button variant="dark" type="submit">Submit</Button>

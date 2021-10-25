@@ -1,10 +1,11 @@
-import { ResponsiveRadar } from '@nivo/radar'
+import { ResponsiveRadar } from '@nivo/radar';
 
-const MyResponsiveRadar = ({ data }) => (
+function Radar(props) {
+    return (
     <ResponsiveRadar
-        data={data}
-        keys={[ 'chardonay', 'carmenere', 'syrah' ]}
-        indexBy="taste"
+        data={props.data}
+        keys={[ 'October' ]}
+        indexBy="emotion"
         valueFormat=">-.2f"
         margin={{ top: 70, right: 80, bottom: 40, left: 80 }}
         borderColor={{ from: 'color' }}
@@ -37,5 +38,6 @@ const MyResponsiveRadar = ({ data }) => (
             }
         ]}
     />
-)
-export default MyResponsiveRadar;
+    )
+}
+export default Radar;
