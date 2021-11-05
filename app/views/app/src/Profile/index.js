@@ -27,7 +27,6 @@ class Profile extends React.Component {
         this.apiClient.getUserData().then((data) =>
             this.setState({...this.state, userData: data.data})
         );
-        console.log(this.state.userData);
     }
 
     render() {

@@ -11,6 +11,9 @@ class Emotion(db.Model):
     emotion_id = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
     date = db.Column(db.Date, nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    month = db.Column(db.Integer, nullable=False)
+    day = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(500), nullable=False)
     
     emotion_data = db.relationship(
@@ -26,6 +29,9 @@ class Emotion(db.Model):
         self.status = kwargs.get('status')
         self.user_id = kwargs.get('user_id')
         self.date = date.today()
+        self.year = date.today().year
+        self.month = date.today().month
+        self.day = date.today().day
     
     def serialize(self):
         return {
@@ -42,12 +48,32 @@ class Emotion(db.Model):
         return Emotion.query.filter_by(id=emotion_id, user_id=user_id).first()
 
     @staticmethod
-    def get_by_date(date, user_id):
-        return Emotion.query.filter_by(date=date, user_id=user_id)
+    def get_by_date(year, month, day, user_id):
+        return Emotion.query.filter_by(
+            year=year, 
+            month=month, 
+            day=day, 
+            user_id=user_id
+        )
     
     @staticmethod
+    def get_by_month_and_year(year, month, user_id):
+        return Emotion.query.filter_by(
+            year=year, 
+            month=month, 
+            user_id=user_id
+        )
+    
+    @staticmethod
+    def get_by_year(year, user_id):
+        return Emotion.query.filter_by(
+            year=year, 
+            user_id=user_id
+        )
+
+    @staticmethod
     def get_all(user_id):
-        return Emotion.query.filter_by(user_id=user_id)
+        return Emotion.query.filter(user_id=user_id)
 
 
 class EmotionData(db.Model):

@@ -1,10 +1,24 @@
 import { ResponsiveRadar } from '@nivo/radar';
 
 function Radar(props) {
+    let months = [
+        // 'December',
+        'November',
+        // 'October',
+        // 'September',
+        // 'August',
+        // 'July',
+        // 'June',
+        // 'May',
+        // 'April',
+        // 'March',
+        // 'February',
+        // 'January'
+    ]
     return (
     <ResponsiveRadar
         data={props.data}
-        keys={[ 'October' ]}
+        keys={months}
         indexBy="emotion"
         valueFormat=">-.2f"
         margin={{ top: 70, right: 80, bottom: 40, left: 80 }}
@@ -13,19 +27,19 @@ function Radar(props) {
         dotSize={10}
         dotColor={{ theme: 'background' }}
         dotBorderWidth={2}
-        colors={{ scheme: 'nivo' }}
+        colors={{ scheme: 'paired' }}
         blendMode="multiply"
         motionConfig="wobbly"
         legends={[
             {
-                anchor: 'top-left',
+                anchor: 'top-right',
                 direction: 'column',
-                translateX: -50,
+                translateX: -300,
                 translateY: -40,
                 itemWidth: 80,
-                itemHeight: 20,
+                itemHeight: 25,
                 itemTextColor: '#999',
-                symbolSize: 12,
+                symbolSize: 15,
                 symbolShape: 'circle',
                 effects: [
                     {

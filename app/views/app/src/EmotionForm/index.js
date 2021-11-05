@@ -18,17 +18,10 @@ class EmotionForm extends React.Component {
 
     handleSubmit(event) {
         event.preventDefault();
-        this.props.apiClient.createEmotion({"status": this.state.value});
+        this.props.apiClient.createEmotion({"status": this.state.value}).then(
+            (newEmotion) => this.props.showModal(newEmotion)
+        );
         event.target.reset();
-        // const date = async () => {  
-        //     await this.props.apiClient.dateExists();
-        // }; 
-        // date().then(() => {  
-        //     this.props.showAlert();
-        // }).catch((error) => {  
-        //     this.props.apiClient.createEmotion({"status": this.state.value});
-        //     event.target.reset();
-        // });
     }
 
     render() {

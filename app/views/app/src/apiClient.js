@@ -7,6 +7,21 @@ const client = axios.create({
  json: true
 });
 
+const monthToMonthNum = {
+  "Jan": "01",
+  "Feb": "02",
+  "Mar": "03",
+  "Apr": "04",
+  "May": "05",
+  "Jun": "06",
+  "Jul": "07",
+  "Aug": "08",
+  "Sep": "09",
+  "Oct": "10",
+  "Nov": "11",
+  "Dec": "12",
+};
+
 class APIClient {
   constructor(accessToken) {
     this.accessToken = accessToken;
@@ -20,8 +35,20 @@ class APIClient {
     return this.perform('delete', `/emotions/${emotion_id}/`);
   }
 
-  getEmotions(dateString) {
-    return this.perform('get', `/emotions/${dateString}/`);
+  getEmotions() {
+    return this.perform('get', `/emotions/`);
+  }
+
+  getEmotionsByDate(year, month, day) {
+    return this.perform('get', `/emotions/${year}/${month}/${day}/`);
+  }
+
+  getEmotionsByMonthAndYear(year, month) {
+    return this.perform('get', `/emotions/${year}/${month}/`);
+  }
+
+  getEmotionsByYear(year) {
+    return this.perform('get', `/emotions/${year}/`);
   }
 
   getUserData() {

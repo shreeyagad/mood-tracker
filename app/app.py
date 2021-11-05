@@ -42,7 +42,6 @@ CORS(app)
 #     emotions = Emotion.get_all(user_id=user_id)
 #     return success_response([e.serialize() for e in emotions])
 
-
 # @app.route("/emotions/<int:emotion_id>/")
 # @oidc.accept_token(True)
 # def get_emotion(emotion_id):
@@ -53,11 +52,38 @@ CORS(app)
 #     return success_response(emotion.serialize())
 
 
-@app.route("/emotions/<date>/")
+# @app.route("/emotions/<date>/")
+# @oidc.accept_token(True)
+# def get_emotions_by_date(date):
+#     user_id = g.oidc_token_info['sub']
+#     emotions = Emotion.get_by_date(date=date, user_id=user_id) 
+#     if emotions is None:
+#         return failure_response("Emotion not found")
+#     return success_response([e.serialize() for e in emotions])
+
+@app.route("/emotions/<int:year>/<int:month>/<int:day>/")
 @oidc.accept_token(True)
-def get_emotions_by_date(date):
+def get_emotions_by_date(year, month, day):
     user_id = g.oidc_token_info['sub']
-    emotions = Emotion.get_by_date(date=date, user_id=user_id) 
+    emotions = Emotion.get_by_date(year=year, month=month, day=day, user_id=user_id) 
+    if emotions is None:
+        return failure_response("Emotion not found")
+    return success_response([e.serialize() for e in emotions])
+
+@app.route("/emotions/<int:year>/<int:month>/")
+@oidc.accept_token(True)
+def get_emotions_by_yr_mo(year, month):
+    user_id = g.oidc_token_info['sub']
+    emotions = Emotion.get_by_month_and_year(year=year, month=month, user_id=user_id) 
+    if emotions is None:
+        return failure_response("Emotion not found")
+    return success_response([e.serialize() for e in emotions])
+
+@app.route("/emotions/<int:year>/")
+@oidc.accept_token(True)
+def get_emotions_by_yr(year):
+    user_id = g.oidc_token_info['sub']
+    emotions = Emotion.get_by_year(year=year, user_id=user_id) 
     if emotions is None:
         return failure_response("Emotion not found")
     return success_response([e.serialize() for e in emotions])

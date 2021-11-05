@@ -7,6 +7,9 @@ import Container from 'react-bootstrap/Container';
 import EmotionNav from "../EmotionNav";
 import Grid from '@material-ui/core/Grid';
 import Emotion from "../Emotion";
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 import { BlinkingCursorTextBuilder } from 'react-animated-text-builders';
 import Radar from "../Radar";
 
@@ -17,27 +20,53 @@ const styles = theme => ({
   },
 });
 
+const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+]
+
+const emotionToColor = {
+    "Anger": "#e8c1a0",
+    "Fear": "#f47560",
+    "Joy": "#f1e15b",
+    "Love": "#e8a838",
+    "Sadness": "#61cdbb",
+    "Surprise": "#97e3d5",
+  }
+
+
 class Statistics extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
           emotions: [],
-          apiClient: null,
+          year: 2021,
         };
     }
 
     updateState = () => {
-        this.state.apiClient.getEmotions().then((data) =>
-          this.setState({...this.state, emotions: data.data})
+        this.apiClient.getEmotionsByYear(this.state.year).then(
+            (data) => this.setState({...this.state, emotions: data.data})
         );
     }
 
     componentDidMount() {
         const accessToken = this.props.authState.accessToken.accessToken;
-        const apiClient = new APIClient(accessToken);
-        this.setState({ apiClient: apiClient });
-        apiClient.getEmotions().then((data) =>
-          this.setState({...this.state, emotions: data.data})
+        this.apiClient = new APIClient(accessToken);
+        this.apiClient.getEmotionsByYear(2021).then(
+            (data) => {
+                this.setState({...this.state, emotions: data.data});
+            }
         );
     }
 
@@ -51,38 +80,18 @@ class Statistics extends React.Component {
             "Sadness": 0,
         }
         for (const emotion of this.state.emotions) {
-            emotionCounts[emotion.emotion] += 1;
-        }
-        for(var key in emotionCounts) {
-            emotionCounts[key] = emotionCounts[key]/6;
-          }
-        return (
-        [
-            {
-                "emotion": "Anger",
-                "October": emotionCounts["Anger"],
-            },
-            {
-                "emotion": "Love",
-                "October": emotionCounts["Love"],
-            },
-            {
-                "emotion": "Sadness",
-                "October": emotionCounts["Sadness"],
-            },
-            {
-                "emotion": "Fear",
-                "October": emotionCounts["Fear"],
-            },
-            {
-                "emotion": "Surprise",
-                "October": emotionCounts["Surprise"],
-            },
-            {
-                "emotion": "Joy",
-                "October": emotionCounts["Joy"],
+            for (var e in emotionToColor) {
+                emotionCounts[e] += (emotion.emotion_data[e]/this.state.emotions.length);
             }
-        ]
+        }
+        return (
+            Object.keys(emotionCounts).map((emotion) => (
+                    {
+                        "emotion": emotion,
+                        "November": emotionCounts[emotion],
+                    }
+                )
+            )
         )
     }
 
@@ -97,8 +106,22 @@ class Statistics extends React.Component {
                     cursorComponent={<div>|</div>}
                     blinkTimeAfterFinish={-1}>Statistics
                 </BlinkingCursorTextBuilder>
-                <div style={{height: 600, marginTop: 20}}>
-                <Radar data={this.generateData(this.state.emotions)} />
+                <ButtonGroup style={{paddingLeft: 100}}aria-label="Basic example">
+                    <DropdownButton variant="secondary" as={ButtonGroup} title="2019" id="bg-nested-dropdown" onClick={() => this.setState({ year: 2019 })}>
+                        { months.map((m) =>
+                        <Dropdown.Item eventKey={m}>{m}</Dropdown.Item>)}
+                    </DropdownButton>
+                    <DropdownButton variant="secondary" as={ButtonGroup} title="2020" id="bg-nested-dropdown" onClick={() => this.setState({ year: 2020 })}>
+                    { months.map((m) =>
+                        <Dropdown.Item eventKey={m}>{m}</Dropdown.Item>)}
+                    </DropdownButton>
+                    <DropdownButton variant="secondary" as={ButtonGroup} title="2021" id="bg-nested-dropdown" onClick={() => this.setState({ year: 2021 })}>
+                    { months.map((m) =>
+                        <Dropdown.Item eventKey={m}>{m}</Dropdown.Item>)}
+                    </DropdownButton>
+                </ButtonGroup>
+                <div style={{height: 500, paddingBottom: 10}}>
+                <Radar data={this.generateData()} />
                 </div>
               </Container>
             </div>

@@ -4,7 +4,7 @@ function PieChart(props) {
     return (
     <ResponsivePie
         data={props.data}
-        margin={{ top: 40, right: 80, bottom: 80, left: 40 }}
+        margin={{ top: 40, right: 40, bottom: 80, left: 40 }}
         innerRadius={0.5}
         padAngle={0.7}
         cornerRadius={3}
@@ -78,17 +78,17 @@ function PieChart(props) {
         legends={[
             {
                 anchor: 'bottom',
-                direction: 'column',
+                direction: 'row',
                 justify: false,
-                translateX: 200,
-                translateY: -150,
-                itemsSpacing: 5,
-                itemWidth: 65,
-                itemHeight: 18,
+                translateX: 0,
+                translateY: 70,
+                itemsSpacing: 12,
+                itemWidth: 60,
+                itemHeight: 25,
                 itemTextColor: '#999',
                 itemDirection: 'left-to-right',
                 itemOpacity: 1,
-                symbolSize: 18,
+                symbolSize: 15,
                 symbolShape: 'circle',
                 effects: [
                     {
