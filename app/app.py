@@ -1,6 +1,8 @@
 from flask import Flask, json, g, request
 from flask_oidc import OpenIDConnect
 from flask_cors import CORS
+import os
+print(os.getcwd(), "cwd")
 from db import db, Emotion, EmotionData
 from services import emotion_service
 from services.endpoint_service import (
