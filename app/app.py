@@ -1,10 +1,10 @@
-import sys
+import os
 import logging
-logging.info(sys.path)
 from flask_oidc import OpenIDConnect
 from flask import Flask, json, g, request
 import requests
 from flask_cors import CORS
+import db 
 from db import db, Emotion, EmotionData
 from services import emotion_service, endpoint_service
 from services.endpoint_service import (
