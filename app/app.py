@@ -9,8 +9,7 @@ import sys
 # print("PATH!!!!!!!!!!!", sys.path)
 # sys.path.append('mood-tracker/app')
 print("PATH!!!!!!!!!!!", sys.path)
-import app.db as db
-from db import db, Emotion, EmotionData
+from app.db import db, Emotion, EmotionData
 from app.services import emotion_service, endpoint_service
 from app.services.endpoint_service import (
     is_access_token_valid, 
