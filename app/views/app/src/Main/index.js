@@ -7,6 +7,7 @@ import Home from '../Home'
 import Data from '../Data'
 import Statistics from '../Statistics';
 
+console.log("IN MAIN.JS")
 class Main extends Component {
   
   constructor(props) {
