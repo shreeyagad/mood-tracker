@@ -4,10 +4,11 @@ from flask_oidc import OpenIDConnect
 from flask import Flask, json, g, request
 import requests
 from flask_cors import CORS
+print(os.getcwd())
 import app.db as db
 from db import db, Emotion, EmotionData
-from services import emotion_service, endpoint_service
-from services.endpoint_service import (
+from app.services import emotion_service, endpoint_service
+from app.services.endpoint_service import (
     is_access_token_valid, 
     is_id_token_valid, 
     config, 
