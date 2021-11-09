@@ -1,5 +1,6 @@
 import sys
-print(sys.path)
+import logging
+logging.info(sys.path)
 from flask_oidc import OpenIDConnect
 from flask import Flask, json, g, request
 import requests
