@@ -1,4 +1,6 @@
 import datetime
+import sys
+sys.path.append('/app')
 from flask_oidc import OpenIDConnect
 from flask import Flask, json, g, request
 import requests
