@@ -1,7 +1,7 @@
 import spacy
 import en_core_web_md
 import torch
-from services.rnn import RNN
+from app.services.rnn import RNN
 
 idx_to_emotion = {
     0: "Anger",
