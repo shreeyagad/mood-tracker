@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from services.emotion_service import idx_to_emotion
+from app.services.emotion_service import idx_to_emotion
 import datetime
 from datetime import date
 
