@@ -15,7 +15,7 @@ nlp = en_core_web_md.load()
 model = RNN(input_size=300, h=100, num_layers=1, output_dim=len(idx_to_emotion), dropout=0.1)
 import os
 print(os.getcwd())
-model.load_model("./services/rnn_fixed.pth")
+model.load_model("services/rnn_fixed.pth")
 
 def status_preprocessor(status):
     word_embeddings = []
