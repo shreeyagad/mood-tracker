@@ -1,20 +1,9 @@
-import os
-import logging
-from flask_oidc import OpenIDConnect
 from flask import Flask, json, g, request
-import requests
+from flask_oidc import OpenIDConnect
 from flask_cors import CORS
-print("GETCWD!!!!!!!!!", os.getcwd())
-import sys
-# print("PATH!!!!!!!!!!!", sys.path)
-# sys.path.append('mood-tracker/app')
-print("PATH!!!!!!!!!!!", sys.path)
-from app.db import db, Emotion, EmotionData
-from app.services import emotion_service, endpoint_service
-from app.services.endpoint_service import (
-    is_access_token_valid, 
-    is_id_token_valid, 
-    config, 
+from db import db, Emotion, EmotionData
+from services import emotion_service
+from services.endpoint_service import (
     success_response, 
     failure_response,
 )
@@ -27,7 +16,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config['SECRET_KEY'] = '7600ee68363968b4d96f132f'
 app.config.update({
-'OIDC_CLIENT_SECRETS': 'app/client_secrets.json',
+'OIDC_CLIENT_SECRETS': 'client_secrets.json',
 'OIDC_RESOURCE_SERVER_ONLY': True
 })
 

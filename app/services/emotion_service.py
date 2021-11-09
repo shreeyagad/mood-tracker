@@ -1,7 +1,7 @@
 import spacy
 import en_core_web_md
 import torch
-from app.services.rnn import RNN
+from services.rnn import RNN
 
 idx_to_emotion = {
     0: "Anger",
@@ -13,7 +13,7 @@ idx_to_emotion = {
 }
 nlp = en_core_web_md.load()
 model = RNN(input_size=300, h=100, num_layers=1, output_dim=len(idx_to_emotion), dropout=0.1)
-model.load_model("app/services/rnn_fixed.pth")
+model.load_model("services/rnn_fixed.pth")
 
 def status_preprocessor(status):
     word_embeddings = []
