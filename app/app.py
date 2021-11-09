@@ -4,7 +4,11 @@ from flask_oidc import OpenIDConnect
 from flask import Flask, json, g, request
 import requests
 from flask_cors import CORS
-print(os.getcwd())
+print("GETCWD!!!!!!!!!", os.getcwd())
+import sys
+# print("PATH!!!!!!!!!!!", sys.path)
+# sys.path.append('mood-tracker/app')
+print("PATH!!!!!!!!!!!", sys.path)
 import app.db as db
 from db import db, Emotion, EmotionData
 from app.services import emotion_service, endpoint_service
