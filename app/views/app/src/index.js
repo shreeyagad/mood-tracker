@@ -4,7 +4,6 @@ import { Router } from 'react-router-dom'
 import { createBrowserHistory } from 'history'
 
 import Main from './Main';
-console.log("IN INDEX.JS")
 const history = createBrowserHistory();
 
 ReactDOM.render((
