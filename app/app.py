@@ -11,7 +11,7 @@ from services.endpoint_service import (
 app = Flask(
     __name__, 
     static_folder='views/app/build',
-    static_url_path=''
+    static_url_path='',
 )
 db_filename = "mood-tracker.db"
 
@@ -32,33 +32,6 @@ oidc = OpenIDConnect(app)
 CORS(app)
 
 ############################ start routes ############################
-
-
-# @app.route("/emotions/")
-# @oidc.accept_token(True)
-# def get_emotions():
-#     user_id = g.oidc_token_info['sub']
-#     emotions = Emotion.get_all(user_id=user_id)
-#     return success_response([e.serialize() for e in emotions])
-
-# @app.route("/emotions/<int:emotion_id>/")
-# @oidc.accept_token(True)
-# def get_emotion(emotion_id):
-#     user_id = g.oidc_token_info['sub']
-#     emotion = Emotion.get_by_emotion_id(emotion_id=emotion_id, user_id=user_id) 
-#     if emotion is None:
-#         return failure_response("Emotion not found")
-#     return success_response(emotion.serialize())
-
-
-# @app.route("/emotions/<date>/")
-# @oidc.accept_token(True)
-# def get_emotions_by_date(date):
-#     user_id = g.oidc_token_info['sub']
-#     emotions = Emotion.get_by_date(date=date, user_id=user_id) 
-#     if emotions is None:
-#         return failure_response("Emotion not found")
-#     return success_response([e.serialize() for e in emotions])
 
 @app.route("/emotions/<int:year>/<int:month>/<int:day>/")
 @oidc.accept_token(True)
