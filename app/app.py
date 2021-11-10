@@ -16,7 +16,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config['SECRET_KEY'] = '7600ee68363968b4d96f132f'
 app.config.update({
-'OIDC_CLIENT_SECRETS': '../app/client_secrets.json',
+'OIDC_CLIENT_SECRETS': 'app/client_secrets.json',
 'OIDC_RESOURCE_SERVER_ONLY': True
 })
 
