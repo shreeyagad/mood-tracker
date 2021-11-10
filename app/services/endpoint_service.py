@@ -25,7 +25,7 @@ def is_id_token_valid(token, issuer, client_id, nonce):
         return False
 
 
-def load_config(fname='../app/client_secrets.json'):
+def load_config(fname='app/client_secrets.json'):
     config = None
     with open(fname) as f:
         config = json.load(f)
