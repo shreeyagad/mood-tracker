@@ -10,8 +10,8 @@ from services.endpoint_service import (
 print("in app.py")
 app = Flask(
     __name__, 
-    template_folder='views/app/build',
-    static_folder='views/app/build/static',
+    static_folder='views/app/build',
+    static_url_path='',
 )
 db_filename = "mood-tracker.db"
 
@@ -35,9 +35,10 @@ CORS(app)
 
 @app.errorhandler(404)
 def not_found(e):
-    return app.send_static_file('index.html')
+    print("not found?")
+    return app.send_static_file('public/index.html')
 
-    
+
 @app.route("/emotions/<int:year>/<int:month>/<int:day>/")
 @oidc.accept_token(True)
 def get_emotions_by_date(year, month, day):
