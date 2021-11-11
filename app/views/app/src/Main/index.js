@@ -14,7 +14,7 @@ class Main extends Component {
     super(props);
     this.oktaAuth = new OktaAuth({
       issuer: 'https://dev-51511124.okta.com/oauth2/default',
-      clientId: '0oa1z0e6gnSJdmvey5d7',
+      clientId: '0oa1z0ei3xlA7K8BA5d7',
       redirectUri: window.location.origin + '/callback'
     });
     this.restoreOriginalUri = async (_oktaAuth, originalUri) => {
