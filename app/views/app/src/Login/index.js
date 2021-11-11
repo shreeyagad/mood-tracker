@@ -13,6 +13,7 @@ class Login extends React.Component {
   }
 
   async login() {
+    console.log(this.props.oktaAuth);
     await this.props.oktaAuth.signInWithRedirect();
   }
 
