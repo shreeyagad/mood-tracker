@@ -12,6 +12,7 @@ class Main extends Component {
   
   constructor(props) {
     super(props);
+    console.log(window.location.origin);
     this.oktaAuth = new OktaAuth({
       issuer: 'https://dev-51511124.okta.com/oauth2/default',
       clientId: '0oa1z0ei3xlA7K8BA5d7',
