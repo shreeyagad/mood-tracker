@@ -7,11 +7,10 @@ from services.endpoint_service import (
     success_response, 
     failure_response,
 )
-
 app = Flask(
     __name__, 
-    static_folder='views/app/build',
-    static_url_path='',
+    template_folder='views/app/build',
+    static_folder='views/app/build/static',
 )
 db_filename = "mood-tracker.db"
 
@@ -50,6 +49,7 @@ def get_emotions_by_yr_mo(year, month):
     if emotions is None:
         return failure_response("Emotion not found")
     return success_response([e.serialize() for e in emotions])
+
 
 @app.route("/emotions/<int:year>/")
 @oidc.accept_token(True)
@@ -109,6 +109,7 @@ def update_emotion(emotion_id):
     emotion.emotion_id = emotion_service.classify_status(status)
     db.session.commit()
     return success_response(emotion.serialize())
+
 
 @app.route("/user/")
 @oidc.accept_token(True)
