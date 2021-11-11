@@ -14,6 +14,7 @@ idx_to_emotion = {
 nlp = en_core_web_md.load()
 model = RNN(input_size=300, h=100, num_layers=1, output_dim=len(idx_to_emotion), dropout=0.1)
 import os
+print(os.getcwd())
 path_parent = os.path.dirname(os.getcwd())
 os.chdir(path_parent)
 model.load_state_dict(torch.load("app/services/rnn_fixed.pth"))
