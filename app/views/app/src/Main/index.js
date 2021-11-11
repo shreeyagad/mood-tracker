@@ -17,6 +17,7 @@ class Main extends Component {
       clientId: '0oa1z0ei3xlA7K8BA5d7',
       redirectUri: window.location.origin + '/callback'
     });
+    console.log(window.location.origin + '/callback');
     this.restoreOriginalUri = async (_oktaAuth, originalUri) => {
       props.history.replace(toRelativeUrl(originalUri, window.location.origin));
     };
