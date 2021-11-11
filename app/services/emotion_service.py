@@ -17,6 +17,7 @@ import os
 print(os.getcwd())
 path_parent = os.path.dirname(os.getcwd())
 os.chdir(path_parent)
+print(os.getcwd())
 model.load_state_dict(torch.load("app/services/rnn_fixed.pth"))
 
 def status_preprocessor(status):
