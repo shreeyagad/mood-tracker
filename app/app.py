@@ -7,6 +7,7 @@ from services.endpoint_service import (
     success_response, 
     failure_response,
 )
+print("in app.py")
 app = Flask(
     __name__, 
     template_folder='views/app/build',
