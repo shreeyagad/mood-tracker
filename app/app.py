@@ -36,7 +36,7 @@ CORS(app)
 @app.errorhandler(404)
 def not_found(e):
     print("not found?")
-    return app.send_static_file('public/index.html')
+    return app.send_static_file('index.html')
 
 
 @app.route("/emotions/<int:year>/<int:month>/<int:day>/")
