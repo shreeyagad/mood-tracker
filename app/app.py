@@ -33,6 +33,11 @@ CORS(app)
 
 ############################ start routes ############################
 
+@app.errorhandler(404)
+def not_found(e):
+    return app.send_static_file('index.html')
+
+    
 @app.route("/emotions/<int:year>/<int:month>/<int:day>/")
 @oidc.accept_token(True)
 def get_emotions_by_date(year, month, day):
