@@ -127,8 +127,17 @@ def get_user_info():
 @app.route("/model/")
 @oidc.accept_token(True)
 def get_model():
-    print(g.oidc_token_info['sub'])
     resp = emotion_service.pull_model_from_aws(g.oidc_token_info['sub'])
+    return success_response(resp)
+
+
+@app.route("/update_model/")
+@oidc.accept_token(True)
+def get_model():
+    user_id = g.oidc_token_info['sub']
+    body = json.loads(request.data)
+    status = body.get("status")
+    resp = emotion_service.upload_status(user_id, status)
     return success_response(resp)
 
 
