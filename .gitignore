@@ -9,3 +9,4 @@ vagrant/a4keypair.pem
 .env
 .DS_Store
 node_modules
+.vscode
