@@ -1,13 +1,13 @@
 from flask import Flask, json, g, request
 from flask_oidc import OpenIDConnect
 from flask_cors import CORS
-from db import db, Emotion, EmotionData
-from services import emotion_service
-from services.endpoint_service import (
+from src.db import db, Emotion, EmotionData
+from src.services import emotion_service
+from src.services.endpoint_service import (
     success_response, 
     failure_response,
 )
-print("in app.py")
+
 app = Flask(
     __name__, 
     static_folder='views/app/build',
@@ -20,7 +20,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
 app.config['SECRET_KEY'] = '7600ee68363968b4d96f132f'
 app.config.update({
-'OIDC_CLIENT_SECRETS': 'app/client_secrets.json',
+'OIDC_CLIENT_SECRETS': 'src/client_secrets.json',
 'OIDC_RESOURCE_SERVER_ONLY': True
 })
 
@@ -122,6 +122,13 @@ def update_emotion(emotion_id):
 def get_user_info():
     # will be easier with Google Authentication
     return success_response(g.oidc_token_info['sub'])
+
+@app.route("/model/")
+@oidc.accept_token(True)
+def get_model():
+    print(g.oidc_token_info['sub'])
+    resp = emotion_service.pull_model_from_aws(g.oidc_token_info['sub'])
+    return success_response(resp)
 
 
 ########################### end of routes ###########################

@@ -48,6 +48,7 @@ class Home extends React.Component {
     this.hideModal = this.hideModal.bind(this);
     this.generateModal = this.generateModal.bind(this);
     this.handleDisagree = this.handleDisagree.bind(this);
+    this.model = null;
   }
 
   componentDidMount() {
@@ -57,6 +58,9 @@ class Home extends React.Component {
     apiClient.getEmotions().then((data) =>
       this.setState({...this.state, emotions: data.data})
     );
+    if (this.model != null) {
+      this.model = apiClient.getModel();
+    }
   }
 
   showModal(newEmotion) {

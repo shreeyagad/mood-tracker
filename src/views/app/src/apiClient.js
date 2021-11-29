@@ -52,16 +52,9 @@ class APIClient {
     return this.perform('get', `/emotions/${year}/`);
   }
 
-  getUserData() {
-    return this.perform('get', '/user/');
+  getModel() {
+    return this.perform('get', `/model/`);
   }
-
-  // dateExists() {
-  //   let date = new Date();
-  //   let dateObjects = [date.getFullYear(), date.getMonth()+1,  date.getDate()];
-  //   let dateString = dateObjects.join('-');
-  //   return this.perform('get', `/emotions/${dateString}/`);
-  // }
 
   async perform (method, resource, data) {
     return client({
