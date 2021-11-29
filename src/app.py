@@ -7,6 +7,7 @@ from src.services.endpoint_service import (
     success_response, 
     failure_response,
 )
+import os
 
 app = Flask(
     __name__, 
@@ -18,6 +19,7 @@ db_filename = "mood-tracker.db"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///%s" % db_filename
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ECHO"] = True
+app.config['SECRET_KEY'] = os.environ.get('FLASK_APP_SECRET_KEY', None)
 app.config.update({
 'OIDC_CLIENT_SECRETS': 'src/client_secrets.json',
 'OIDC_RESOURCE_SERVER_ONLY': True
