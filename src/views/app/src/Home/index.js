@@ -47,6 +47,7 @@ class Home extends React.Component {
     this.showModal =  this.showModal.bind(this);
     this.hideModal = this.hideModal.bind(this);
     this.generateModal = this.generateModal.bind(this);
+    this.handleStatus = this.handleStatus.bind(this);
     this.handleDisagree = this.handleDisagree.bind(this);
     this.model = null;
   }
@@ -59,7 +60,7 @@ class Home extends React.Component {
       this.setState({...this.state, emotions: data.data})
     );
     if (this.model != null) {
-      this.model = apiClient.getModel();
+      this.model = apiClient.downloadModel();
     }
   }
 
@@ -73,7 +74,7 @@ class Home extends React.Component {
   }
 
   getEmotionData(emotion) {
-    function transformNum(num) {return parseFloat(num).toFixed(2)};
+    function transformNum(num) {return parseFloat(num).toFixed(2)}
     return (
       Object.keys(emotionToColor).map(e => (
       {
@@ -85,27 +86,17 @@ class Home extends React.Component {
     )
   }
 
-  handleDisagree() {
-    this.setState({show: false});
-    return (
-      <Modal centered backdrop="static" onHide={this.hideModal} keyboard={false}>
-        <Modal.Header closeButton>
-          <Modal.Title>{this.state.currEmotion.date}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Modal.Title style={{color: emotionToColor[this.state.currEmotion.emotion], textAlign: 'center', marginBottom: 20}}>Select the emotion you feel.</Modal.Title>
-          <p>{this.state.currEmotion.status}</p>
-          {/* <Container style={{height: 400}}><PieChart data={this.emotionData}/></Container> */}
-        </Modal.Body>
-        <Modal.Footer>
-          {Object.keys(emotionToColor).map((e) =>
-            <Button style={{backgroundColor: emotionToColor[e], border: 'none'}} onClick={this.hideModal}>
-              e
-            </Button>
-          )}
-      </Modal.Footer>
-      </Modal>
-    )
+  handleStatus(emotion_id, status) {
+    this.hideModal();
+    console.log("Agree handled: "+ status)
+    this.state.apiClient.uploadStatus(emotion_id, status);
+
+  }
+
+  handleDisagree(emotion_id, status) {
+    this.hideModal();
+    console.log("Disagree handled: "+ status)
+    this.handleStatus(emotion_id, status);
   }
 
   generateModal() {
@@ -121,10 +112,10 @@ class Home extends React.Component {
             <Container style={{height: 400}}><PieChart data={this.getEmotionData(this.state.currEmotion)}/></Container>
           </Modal.Body>
           <Modal.Footer>
-          <Button style={{backgroundColor: "#61cdbb", border: 'none'}} onClick={this.hideModal}>
+          <Button style={{backgroundColor: "#61cdbb", border: 'none'}} onClick={() => this.handleStatus(this.state.currEmotion.id, this.state.currEmotion.status)}>
             Agree
           </Button>
-          <Button style={{backgroundColor: "#f47560", border: 'none'}} onClick={this.handleDisagree}>
+          <Button style={{backgroundColor: "#f47560", border: 'none'}} onClick={() => this.handleDisagree(this.state.currEmotion.id, this.state.currEmotion.status)}>
             Disagree
           </Button>
         </Modal.Footer>

@@ -9,7 +9,6 @@ import Row from 'react-bootstrap/Row';
 import EmotionNav from "../EmotionNav";
 import Grid from '@material-ui/core/Grid';
 import Emotion from "../Emotion";
-import Pagination from 'react-bootstrap/Pagination';
 import PieChart from "../PieChart";
 import { BlinkingCursorTextBuilder } from 'react-animated-text-builders';
 import Calendar from 'react-calendar'; 
@@ -63,20 +62,25 @@ class Data extends React.Component {
       fontWeight: 'bold',
     });
 
-    updateState = () => {
-      this.apiClient.getEmotionsByDate(...this.state.currentDay).then((data) => {
+    updateState = (currentDay) => {
+      currentDay = currentDay ? currentDay : this.state.currentDay;
+      this.apiClient.getEmotionsByDate(...currentDay).then((data) => {
           this.setState({...this.state, emotions: data.data});
           this.setState({...this.state, aggregateData: this.getAggregateData(data.data)});
         }
       )
     }
 
-    componentDidMount() {
+    componentDidMount = () => {
       const accessToken = this.props.authState.accessToken.accessToken;
       this.apiClient = new APIClient(accessToken);
+      let today = new Date();
+      let currentDay = [today.getFullYear(), today.getMonth()+1, today.getDate()];
+      this.setState({currentDay: currentDay});
+      this.updateState(currentDay);
     }
 
-    handleClickDay(value) {
+    handleClickDay = (value) => {
       let month = parseInt(monthToMonthNum[value.toString().slice(4,7)]);
       let day = parseInt(value.toString().slice(8,10));
       let year = parseInt(value.toString().slice(11,15));
@@ -85,10 +89,10 @@ class Data extends React.Component {
           this.setState({...this.state, emotions: data.data});
           this.setState({...this.state, aggregateData: this.getAggregateData(data.data)});
         }
-      );
+    );
     }
 
-    getAggregateData = (emotions) => {
+    getAggregateData(emotions) {
       if (emotions.length <= 0) {
         return [];
       }
@@ -115,50 +119,40 @@ class Data extends React.Component {
 
     renderEmotions = (emotions) => {
       return (
-        // <Grid container style={{ marginLeft: 15, paddingTop: 75}} spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 10 }}>
         <Container>
           {emotions.map((emotion) => (
           <Grid style={{paddingBottom: 25}}>
-            <Emotion updateState={this.updateState} emotion={emotion} apiClient={this.apiClient} />
+            <Emotion key={emotion.id} updateState={this.updateState} emotion={emotion} apiClient={this.apiClient} />
           </Grid>
           ))}
         </Container>
-    )
+      );
     }
 
     render() {
-        return (
-            <div className={styles.root}>
+      return (
+          <div className={styles.root}>
+            <Container>
+              <EmotionNav></EmotionNav>
+              <BlinkingCursorTextBuilder
+                  textStyle={{fontWeight :"bold", fontSize : 50}}
+                  style={{marginTop:"10", marginBottom :"10px"}}
+                  cursorComponent={<div>|</div>}
+                  blinkTimeAfterFinish={-1}>Data
+              </BlinkingCursorTextBuilder>
+              <h4 style={{textAlign: 'center', color: 'grey', marginBottom: 50}}>Click on day to see data.</h4>
               <Container>
-                <EmotionNav></EmotionNav>
-                <BlinkingCursorTextBuilder
-                    textStyle={{fontWeight :"bold", fontSize : 50}}
-                    style={{marginTop:"10", marginBottom :"10px"}}
-                    cursorComponent={<div>|</div>}
-                    blinkTimeAfterFinish={-1}>Data
-                </BlinkingCursorTextBuilder>
-                <h4 style={{textAlign: 'center', color: 'grey', marginBottom: 50}}>Click on day to see data.</h4>
-                <Container>
-                  <Row>
-                    <Col sm={4} style={{padding: 0}}><Calendar style={{fontFamily: 'inherit'}} onClickDay={this.handleClickDay}/></Col>
-                    <Col sm={6}><Container style={{height: 400, position: 'relative', left: -100}}><PieChart data={this.state.aggregateData}/></Container></Col>
-                    <Col sm={2} style={{position: 'relative', left: -150}}>
-                      { this.renderEmotions(this.state.emotions) }
-                      {/* <Row> */}
-                        {/* <Pagination style={{display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', left: 80}}>
-                          <Pagination.First />
-                          <Pagination.Prev />
-                          <Pagination.Item active>{1}</Pagination.Item>
-                          <Pagination.Next />
-                          <Pagination.Last />
-                        </Pagination> */}
-                      {/* </Row> */}
-                    </Col>
-                  </Row>
-                </Container>
+                <Row>
+                  <Col sm={4} style={{padding: 0}}><Calendar style={{fontFamily: 'inherit'}} onClickDay={this.handleClickDay}/></Col>
+                  <Col sm={6}><Container style={{height: 400, position: 'relative', left: -100}}><PieChart data={this.state.aggregateData}/></Container></Col>
+                  <Col sm={2} style={{position: 'relative', left: -150}}>
+                    { this.renderEmotions(this.state.emotions) }
+                  </Col>
+                </Row>
               </Container>
-            </div>
-        )
+            </Container>
+          </div>
+      )
     }
 }
 
