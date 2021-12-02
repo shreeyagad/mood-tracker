@@ -143,8 +143,16 @@ def upload_status():
     body = json.loads(request.data)
     emotion_id = body.get("emotion_id")
     status = body.get("status")
-    emotion_idx = body.get("emotion_idx")
-    emotion_service.upload_status(user_id, emotion_id, status, emotion_idx)
+    emotion_name = body.get("emotion_name")
+    emotion = Emotion.get_by_emotion_id(emotion_id, user_id)
+    if emotion_name is None: # user agreed with the model's prediction
+        if emotion is None:
+            return failure_response("Emotion not found")
+        else:
+            emotion_idx = emotion.emotion_id
+    else:
+        emotion_idx = emotion_service.emotion_to_idx[emotion_name]
+    emotion_service.upload_status(user_id, emotion.aws_id, status, emotion_idx)
     return success_response(status)
 
 @app.route("/upload_model/")

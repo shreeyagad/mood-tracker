@@ -17,6 +17,8 @@ idx_to_emotion = {
     4: "Sadness",
     5: "Surprise",
 }
+emotion_to_idx = {v: k for (k, v) in idx_to_emotion.items()}
+
 nlp = en_core_web_md.load()
 model = RNN(input_size=300, h=100, num_layers=1, output_dim=len(idx_to_emotion), dropout=0.1)
 
@@ -80,13 +82,13 @@ def classify_status(status):
     predicted = int(predicted.squeeze())
     return predicted, output_loss.squeeze()
 
-def upload_status(user_id, emotion_id, status, emotion_idx):
+def upload_status(user_id, aws_id, status, emotion_idx):
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
     bucket_name = "mood-tracker-statuses"
 
     # save status to file
     status_json = {"emotion_idx": emotion_idx, "status": status}
-    status_file_name = f"{str(emotion_id)}.json"
+    status_file_name = f"{str(aws_id)}.json"
     with open(status_file_name, "w") as status_file:
         json.dump(status_json, status_file)
     
@@ -96,10 +98,10 @@ def upload_status(user_id, emotion_id, status, emotion_idx):
     # delete file
     os.remove(status_file_name)
 
-def delete_status(user_id, emotion_id):
+def delete_status(user_id, aws_id):
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
     bucket_name = "mood-tracker-statuses"
-    key = f"{h_user_id}/{str(emotion_id)}.txt"
+    key = f"{h_user_id}/{str(aws_id)}.txt"
     
     # delete status from bucket
     s3.delete_object(

@@ -122,7 +122,7 @@ class Data extends React.Component {
         <Container>
           {emotions.map((emotion) => (
           <Grid style={{paddingBottom: 25}}>
-            <Emotion key={emotion.id} updateState={this.updateState} emotion={emotion} apiClient={this.apiClient} />
+            <Emotion key={emotion.aws_id} updateState={this.updateState} emotion={emotion} apiClient={this.apiClient} />
           </Grid>
           ))}
         </Container>

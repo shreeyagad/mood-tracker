@@ -56,10 +56,8 @@ class APIClient {
     return this.perform('get', `/download_model/`);
   }
 
-  uploadStatus(emotion_id, status) { // add emotion_idx
-    let obj = Object({"emotion_id": emotion_id, "status": status, "emotion_idx": 0});
-    // TODO: replace emotion_idx with actual emotion_idx
-    console.log(obj);
+  uploadStatus(emotion_id, status, emotion_name=null) {
+    let obj = Object({"emotion_id": emotion_id, "status": status, "emotion_name": emotion_name});
     return this.perform('post', `/upload_status/`, obj);
   }
 

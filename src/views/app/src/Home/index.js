@@ -86,17 +86,41 @@ class Home extends React.Component {
     )
   }
 
-  handleStatus(emotion_id, status) {
+  handleStatus(emotion_name=null) {
     this.hideModal();
-    console.log("Agree handled: "+ status)
-    this.state.apiClient.uploadStatus(emotion_id, status);
-
+    this.setState({disagreeShow: false});
+    let emotion_id = this.state.currEmotion.id;
+    let status = this.state.currEmotion.status;
+    this.state.apiClient.uploadStatus(emotion_id, status, emotion_name);
   }
 
-  handleDisagree(emotion_id, status) {
+  handleDisagree() {
     this.hideModal();
-    console.log("Disagree handled: "+ status)
-    this.handleStatus(emotion_id, status);
+    this.setState({disagreeShow: true});
+  }
+
+  generateDisagreeModal() {
+    return (
+      <Modal centered backdrop="static" show={this.state.disagreeShow} onHide={!this.state.disagreeShow} keyboard={false}>
+        <Modal.Header style={{textAlign: 'center'}}>
+          <Modal.Title>Disagree</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Modal.Title style={{color: emotionToColor[this.state.currEmotion.emotion], textAlign: 'center', marginBottom: 20}}>The model predicted {this.state.currEmotion.emotion} for:</Modal.Title>
+          <p style={{textAlign: 'center'}}>{this.state.currEmotion.status}</p>
+          <Modal.Title style={{textAlign: 'center'}}>What is the correct emotion?</Modal.Title>
+        </Modal.Body>
+        <Modal.Footer>
+          {
+            Object.keys(emotionToColor).map(emotion => 
+            <Button key={emotion} style={{backgroundColor: emotionToColor[emotion], border: 'none'}} 
+              onClick={() => this.handleStatus(emotion)}>
+              {emotion}
+            </Button>)
+          }
+        </Modal.Footer>
+      </Modal>
+    )
   }
 
   generateModal() {
@@ -108,14 +132,14 @@ class Home extends React.Component {
           </Modal.Header>
           <Modal.Body>
             <Modal.Title style={{color: emotionToColor[this.state.currEmotion.emotion], textAlign: 'center', marginBottom: 20}}>You felt {this.state.currEmotion.emotion}.</Modal.Title>
-            <p>{this.state.currEmotion.status}</p>
+            <p style={{textAlign: 'center'}}>{this.state.currEmotion.status}</p>
             <Container style={{height: 400}}><PieChart data={this.getEmotionData(this.state.currEmotion)}/></Container>
           </Modal.Body>
           <Modal.Footer>
-          <Button style={{backgroundColor: "#61cdbb", border: 'none'}} onClick={() => this.handleStatus(this.state.currEmotion.id, this.state.currEmotion.status)}>
+          <Button style={{backgroundColor: "#61cdbb", border: 'none'}} onClick={() => this.handleStatus()}>
             Agree
           </Button>
-          <Button style={{backgroundColor: "#f47560", border: 'none'}} onClick={() => this.handleDisagree(this.state.currEmotion.id, this.state.currEmotion.status)}>
+          <Button style={{backgroundColor: "#f47560", border: 'none'}} onClick={() => this.handleDisagree()}>
             Disagree
           </Button>
         </Modal.Footer>
@@ -142,7 +166,7 @@ class Home extends React.Component {
           <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
           <Row>
             <EmotionForm showModal={this.showModal} showAlert={this.showAlert} apiClient={this.state.apiClient}/>
-            {this.generateModal()}
+            {this.state.disagreeShow ? this.generateDisagreeModal(): this.generateModal()}
           </Row>
         </Container>
       </div>

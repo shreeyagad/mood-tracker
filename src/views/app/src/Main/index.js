@@ -7,7 +7,6 @@ import Home from '../Home'
 import Data from '../Data'
 import Statistics from '../Statistics';
 
-console.log("IN MAIN.JS")
 class Main extends Component {
   
   constructor(props) {
@@ -17,7 +16,6 @@ class Main extends Component {
       clientId: '0oa2lchc6k2h1T0Ug5d7',
       redirectUri: window.location.origin + '/callback'
     });
-    console.log(window.location.origin + '/callback');
     this.restoreOriginalUri = async (_oktaAuth, originalUri) => {
       props.history.replace(toRelativeUrl(originalUri, window.location.origin));
     };
