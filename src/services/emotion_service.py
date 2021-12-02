@@ -3,7 +3,9 @@ import torch
 import torch.optim as optim
 import os
 from src.services.rnn import RNN
+# from rnn import RNN
 import boto3
+import json
 import pickle
 import hashlib
 
@@ -15,6 +17,8 @@ idx_to_emotion = {
     4: "Sadness",
     5: "Surprise",
 }
+emotion_to_idx = {v: k for (k, v) in idx_to_emotion.items()}
+
 nlp = en_core_web_md.load()
 model = RNN(input_size=300, h=100, num_layers=1, output_dim=len(idx_to_emotion), dropout=0.1)
 
@@ -40,7 +44,7 @@ creds = resp['Credentials']
 
 s3 = boto3.client(
     's3',
-    region_name='us-east-2',
+    region_name='us-east-1',
     aws_access_key_id=creds['AccessKeyId'],
     aws_secret_access_key=creds['SecretKey'],
     aws_session_token=creds['SessionToken'],
@@ -48,13 +52,14 @@ s3 = boto3.client(
 
 bucket_name = 'mood-tracker-models'
 
-def pull_model_from_aws(email_address):
-    h_email_address = hashlib.md5(bytes(email_address, 'utf-8')).hexdigest()
-    print(f'model_{h_email_address}.pth')
-    s3.download_file(bucket_name, f'model_{h_email_address}.pth', 'rnn_fixed.pth')
-    model.load_state_dict(torch.load('rnn_fixed.pth'))
-    p, _ = classify_status("Today was an awesome day")
-    return idx_to_emotion[p]
+def pull_model_from_aws(user_id):
+    try:
+        h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
+        s3.download_file(bucket_name, f'model_{h_user_id}.pth', 'rnn_fixed.pth')
+        model.load_state_dict(torch.load('rnn_fixed.pth'))
+        return "Model downloaded successfully"
+    except BaseException as err:
+        return str(err)
 
 def status_preprocessor(status):
     word_embeddings = []
@@ -77,18 +82,30 @@ def classify_status(status):
     predicted = int(predicted.squeeze())
     return predicted, output_loss.squeeze()
 
-# def update_model(status, expected_emotion_idx, softmax_loss):
-#     online_optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-#     loss = model.compute_Loss(softmax_loss, expected_emotion_idx)
-#     optimizer.zero_grad()
+def upload_status(user_id, aws_id, status, emotion_idx):
+    h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
+    bucket_name = "mood-tracker-statuses"
 
-#     loss.backward()
-#     torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
-#     optimizer.step()
+    # save status to file
+    status_json = {"emotion_idx": emotion_idx, "status": status}
+    status_file_name = f"{str(aws_id)}.json"
+    with open(status_file_name, "w") as status_file:
+        json.dump(status_json, status_file)
+    
+    # upload file to bucket
+    s3.upload_file(status_file_name, bucket_name, f"{h_user_id}/{status_file_name}")
 
-#     (vec_in, expected_emotion)
+    # delete file
+    os.remove(status_file_name)
 
-def test():
-    pull_model_from_aws("sg988@cornell.edu")
+def delete_status(user_id, aws_id):
+    h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
+    bucket_name = "mood-tracker-statuses"
+    key = f"{h_user_id}/{str(aws_id)}.txt"
+    
+    # delete status from bucket
+    s3.delete_object(
+        Bucket=bucket_name,
+        Key=key,
+    )
 
-test()

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const BASE_URI = 'http://localhost:4433';
-const BASE_URI = 'https://mood-tracker-sg.herokuapp.com';
+const BASE_URI = 'http://localhost:4433';
+// const BASE_URI = 'https://mood-tracker-sg.herokuapp.com';
 
 const client = axios.create({
  baseURL: BASE_URI,
@@ -52,8 +52,17 @@ class APIClient {
     return this.perform('get', `/emotions/${year}/`);
   }
 
-  getModel() {
-    return this.perform('get', `/model/`);
+  downloadModel() {
+    return this.perform('get', `/download_model/`);
+  }
+
+  uploadStatus(emotion_id, status, emotion_name=null) {
+    let obj = Object({"emotion_id": emotion_id, "status": status, "emotion_name": emotion_name});
+    return this.perform('post', `/upload_status/`, obj);
+  }
+
+  uploadModel() {
+    return this.perform('get', `/upload_model/`);
   }
 
   async perform (method, resource, data) {

@@ -99,8 +99,10 @@ def delete_emotion(emotion_id):
     emotion = Emotion.get_by_emotion_id(emotion_id, user_id)
     if emotion is None:
         return failure_response("emotion not found")
+    emotion_service.delete_status(user_id, emotion_id)
     db.session.delete(emotion)
     db.session.commit()
+
     return success_response(emotion.serialize())
 
 
@@ -124,12 +126,44 @@ def get_user_info():
     # will be easier with Google Authentication
     return success_response(g.oidc_token_info['sub'])
 
-@app.route("/model/")
+@app.route("/download_model/")
 @oidc.accept_token(True)
-def get_model():
-    print(g.oidc_token_info['sub'])
+def download_model():
     resp = emotion_service.pull_model_from_aws(g.oidc_token_info['sub'])
-    return success_response(resp)
+    if resp == "Model downloaded successfully":
+        return success_response(resp)
+    else:
+        return failure_response(resp)
+
+
+@app.route("/upload_status/", methods=["POST"])
+@oidc.accept_token(True)
+def upload_status():
+    user_id = g.oidc_token_info['sub']
+    body = json.loads(request.data)
+    emotion_id = body.get("emotion_id")
+    status = body.get("status")
+    emotion_name = body.get("emotion_name")
+    emotion = Emotion.get_by_emotion_id(emotion_id, user_id)
+    if emotion_name is None: # user agreed with the model's prediction
+        if emotion is None:
+            return failure_response("Emotion not found")
+        else:
+            emotion_idx = emotion.emotion_id
+    else:
+        emotion_idx = emotion_service.emotion_to_idx[emotion_name]
+    emotion_service.upload_status(user_id, emotion.aws_id, status, emotion_idx)
+    return success_response(status)
+
+@app.route("/upload_model/")
+@oidc.accept_token(True)
+def upload_model():
+    user_id = g.oidc_token_info['sub']
+    resp = emotion_service.push_model_to_aws(user_id)
+    if resp == "Model uploaded successfully":
+        return success_response(resp)
+    else:
+        return failure_response(resp)
 
 
 ########################### end of routes ###########################
