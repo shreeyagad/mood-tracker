@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const BASE_URI = 'http://localhost:4433';
-// const BASE_URI = 'https://mood-tracker-sg.herokuapp.com';
+// const BASE_URI = 'http://localhost:4433';
+const BASE_URI = 'https://mood-tracker-sg.herokuapp.com';
 
 const client = axios.create({
  baseURL: BASE_URI,
