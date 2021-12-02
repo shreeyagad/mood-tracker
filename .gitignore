@@ -10,3 +10,4 @@ vagrant/a4keypair.pem
 .DS_Store
 node_modules
 .vscode
+rnn_fixed.pth
