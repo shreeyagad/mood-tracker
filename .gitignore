@@ -11,3 +11,5 @@ vagrant/a4keypair.pem
 node_modules
 .vscode
 rnn_fixed.pth
+lambda_function.py
+Dockerfile

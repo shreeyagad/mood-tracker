@@ -92,6 +92,9 @@ class Home extends React.Component {
     let emotion_id = this.state.currEmotion.id;
     let status = this.state.currEmotion.status;
     this.state.apiClient.uploadStatus(emotion_id, status, emotion_name);
+    if (emotion_name !== null) {
+      this.state.apiClient.updateEmotion(emotion_id, emotion_name);
+    }
   }
 
   handleDisagree() {

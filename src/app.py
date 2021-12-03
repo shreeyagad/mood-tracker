@@ -114,8 +114,7 @@ def update_emotion(emotion_id):
     if emotion is None:
         return failure_response("Emotion not found")
     body = json.loads(request.data)
-    status = body.get("status")
-    emotion.emotion_id = emotion_service.classify_status(status)
+    emotion.emotion_id = emotion_service.emotion_to_idx[body.get("emotion_name")]
     db.session.commit()
     return success_response(emotion.serialize())
 
@@ -149,10 +148,8 @@ def upload_status():
         if emotion is None:
             return failure_response("Emotion not found")
         else:
-            emotion_idx = emotion.emotion_id
-    else:
-        emotion_idx = emotion_service.emotion_to_idx[emotion_name]
-    emotion_service.upload_status(user_id, emotion.aws_id, status, emotion_idx)
+            emotion_name = emotion_service.idx_to_emotion[emotion.emotion_id]
+    emotion_service.upload_status(user_id, emotion.aws_id, status, emotion_name)
     return success_response(status)
 
 @app.route("/upload_model/")

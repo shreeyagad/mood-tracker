@@ -32,6 +32,11 @@ class APIClient {
     return this.perform('post', '/emotions/', emotion);
   }
 
+  updateEmotion(emotion_id, emotion_name) {
+    let obj = Object({"emotion_name": emotion_name});
+    return this.perform('put', `/emotions/${emotion_id}/`, obj);
+  }
+
   deleteEmotion(emotion_id) {
     return this.perform('delete', `/emotions/${emotion_id}/`);
   }
