@@ -88,7 +88,7 @@ class Statistics extends React.Component {
             Object.keys(emotionCounts).map((emotion) => (
                     {
                         "emotion": emotion,
-                        "November": emotionCounts[emotion],
+                        "December": emotionCounts[emotion],
                     }
                 )
             )
@@ -99,7 +99,7 @@ class Statistics extends React.Component {
         return (
             <div className={styles.root}>
               <Container>
-                <EmotionNav></EmotionNav>
+                <EmotionNav oktaAuth={this.props.oktaAuth} apiClient={this.apiClient}></EmotionNav>
                 <BlinkingCursorTextBuilder
                     textStyle={{fontWeight :"bold", fontSize : "50px"}}
                     style={{marginTop:"10", marginBottom :"10px"}}

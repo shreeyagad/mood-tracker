@@ -37,6 +37,7 @@ class RNN(nn.Module):
 
 	def load_model(self, save_path):
 		self.load_state_dict(torch.load(save_path))
+		self.eval()
 	
 	def save_model(self, save_path):
 		torch.save(self.state_dict(), save_path)

@@ -2,8 +2,8 @@ import { ResponsiveRadar } from '@nivo/radar';
 
 function Radar(props) {
     let months = [
-        // 'December',
-        'November',
+        'December',
+        // 'November',
         // 'October',
         // 'September',
         // 'August',

@@ -2,7 +2,6 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/Button';
-import Grid from '@material-ui/core/Grid';
 import Row from 'react-bootstrap/Row';
 import { withOktaAuth } from '@okta/okta-react';
 import EmotionForm from "../EmotionForm"
@@ -39,38 +38,32 @@ class Home extends React.Component {
     this.state = {
       value: 0,
       emotions: [],
-      apiClient: null,
-      show: false,
       currEmotion: null,
+      show: false,
       disagreeShow: false,
     };
+    const accessToken = this.props.authState.accessToken.accessToken;
+    this.apiClient = new APIClient(accessToken);
+    
     this.showModal =  this.showModal.bind(this);
-    this.hideModal = this.hideModal.bind(this);
     this.generateModal = this.generateModal.bind(this);
+
     this.handleStatus = this.handleStatus.bind(this);
     this.handleDisagree = this.handleDisagree.bind(this);
+    
     this.model = null;
   }
 
   componentDidMount() {
-    const accessToken = this.props.authState.accessToken.accessToken;
-    const apiClient = new APIClient(accessToken);
-    this.setState({ apiClient: apiClient });
-    apiClient.getEmotions().then((data) =>
+    this.apiClient.getEmotions().then((data) =>
       this.setState({...this.state, emotions: data.data})
     );
-    if (this.model != null) {
-      this.model = apiClient.downloadModel();
-    }
+    this.model = this.apiClient.downloadModel();
   }
 
   showModal(newEmotion) {
     this.setState({currEmotion: newEmotion.data});
     this.setState({show: true});
-  }
-
-  hideModal() {
-    this.setState({show: false});
   }
 
   getEmotionData(emotion) {
@@ -87,18 +80,18 @@ class Home extends React.Component {
   }
 
   handleStatus(emotion_name=null) {
-    this.hideModal();
+    this.setState({show: false});
     this.setState({disagreeShow: false});
     let emotion_id = this.state.currEmotion.id;
     let status = this.state.currEmotion.status;
-    this.state.apiClient.uploadStatus(emotion_id, status, emotion_name);
+    this.apiClient.uploadStatus(emotion_id, status, emotion_name);
     if (emotion_name !== null) {
-      this.state.apiClient.updateEmotion(emotion_id, emotion_name);
+      this.apiClient.updateEmotion(emotion_id, emotion_name);
     }
   }
 
   handleDisagree() {
-    this.hideModal();
+    this.setState({show: false});
     this.setState({disagreeShow: true});
   }
 
@@ -129,7 +122,7 @@ class Home extends React.Component {
   generateModal() {
     if (this.state.show) {
       return (
-        <Modal centered backdrop="static" show={this.state.show} onHide={this.hideModal} keyboard={false}>
+        <Modal centered backdrop="static" show={this.state.show} onHide={() => this.setState({show: false})} keyboard={false}>
           <Modal.Header>
             <Modal.Title>{this.state.currEmotion.date}</Modal.Title>
           </Modal.Header>
@@ -151,13 +144,11 @@ class Home extends React.Component {
     }
   }
 
-
-
   render() {
     return (
       <div className={styles.root}>
         <Container>
-          <EmotionNav oktaAuth={this.props.oktaAuth}></EmotionNav>
+          <EmotionNav oktaAuth={this.props.oktaAuth} apiClient={this.apiClient}></EmotionNav>
           <BlinkingCursorTextBuilder
             textStyle={{fontWeight :"bold", fontSize : "50px"}}
             style={{marginTop:"200px", marginBottom :"10px"}}
@@ -165,10 +156,9 @@ class Home extends React.Component {
             blinkTimeAfterFinish={-1}>Welcome  to  Mood  Tracker
           </BlinkingCursorTextBuilder>
           <h4 style={{textAlign: 'center', paddingTop: 20, color: 'grey'}}>Enter your daily status below.</h4>
-
           <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
           <Row>
-            <EmotionForm showModal={this.showModal} showAlert={this.showAlert} apiClient={this.state.apiClient}/>
+            <EmotionForm showModal={this.showModal} showAlert={this.showAlert} apiClient={this.apiClient}/>
             {this.state.disagreeShow ? this.generateDisagreeModal(): this.generateModal()}
           </Row>
         </Container>

@@ -55,17 +55,22 @@ bucket_name = 'mood-tracker-models'
 def pull_model_from_aws(user_id):
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
     try:
-        s3.download_file(bucket_name, f'model_{h_user_id}.pth', 'rnn_fixed.pth')
+        print("downloaded user's model")
+        s3.download_file(bucket_name, f'model_{h_user_id}.pth', 'src/services/rnn_fixed.pth')
     except botocore.exceptions.ClientError: # download base model if error
         print("downloading BASE MODEL")
-        s3.download_file(bucket_name, 'base_emotion_model.pth', 'rnn_fixed.pth')
-    model.load_state_dict(torch.load('rnn_fixed.pth'))
+        s3.download_file(bucket_name, 'base_emotion_model.pth', 'src/services/rnn_fixed.pth')
+    model.load_model('src/services/rnn_fixed.pth')
+    test_status = "Today I saw two stray cats sitting near my apartment, and they were just relaxing in the shade together. It was the cutest thing I had ever seen, and it made my day."
+    predicted, output_loss = classify_status(test_status)
+    assert (predicted == 2)
+    print(output_loss)
     return "Model downloaded successfully"
 
 
 def push_model_to_aws(user_id):
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
-    s3.upload_file('rnn_fixed.pth', bucket_name, f"model_{h_user_id}.pth")
+    s3.upload_file('src/services/rnn_fixed.pth', bucket_name, f"model_{h_user_id}.pth")
     return "Model uploaded successfully"
 
 
@@ -91,6 +96,7 @@ def classify_status(status):
     return predicted, output_loss.squeeze()
 
 def upload_status(user_id, aws_id, status, emotion_name):
+    print("uploading status")
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
     bucket_name = "mood-tracker-statuses"
 
@@ -116,8 +122,17 @@ def update_model(status, emotion_name):
     training_data = [(processed_status, emotion_to_idx[emotion_name])]
     online_rnn_train_loader, _ = rnn.get_data_loaders(training_data, [], batch_size=1) 
     online_optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    model.train()
     rnn.train_epoch_rnn(model, online_rnn_train_loader, online_optimizer)
-    model.save_model("rnn_fixed.pth")
+    model.save_model("src/services/rnn_fixed.pth")
+    model.eval()
+
+def update_emotion(emotion, emotion_name):
+    emotion_idx = emotion_to_idx[emotion_name]
+    emotion.emotion_id = emotion_idx
+    new_emotion_data_tensor = torch.zeros(len(idx_to_emotion))
+    new_emotion_data_tensor[emotion_idx] = 1
+    return new_emotion_data_tensor
 
 def delete_status(user_id, aws_id):
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()

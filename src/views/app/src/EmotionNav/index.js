@@ -8,7 +8,9 @@ class EmotionNav extends React.Component {
 
   logout = (e) => {
     e.preventDefault();
-    this.props.oktaAuth.signOut();
+    this.props.apiClient.uploadModel().then((value) => {
+        this.props.oktaAuth.signOut();
+      });
   }
 
   render() {

@@ -48,6 +48,7 @@ def get_emotions_by_date(year, month, day):
         return failure_response("Emotion not found")
     return success_response([e.serialize() for e in emotions])
 
+
 @app.route("/emotions/<int:year>/<int:month>/")
 @oidc.accept_token(True)
 def get_emotions_by_yr_mo(year, month):
@@ -99,7 +100,7 @@ def delete_emotion(emotion_id):
     emotion = Emotion.get_by_emotion_id(emotion_id, user_id)
     if emotion is None:
         return failure_response("emotion not found")
-    emotion_service.delete_status(user_id, emotion_id)
+    emotion_service.delete_status(user_id, emotion.aws_id)
     db.session.delete(emotion)
     db.session.commit()
 
@@ -114,7 +115,14 @@ def update_emotion(emotion_id):
     if emotion is None:
         return failure_response("Emotion not found")
     body = json.loads(request.data)
-    emotion.emotion_id = emotion_service.emotion_to_idx[body.get("emotion_name")]
+    new_emotion_data_tensor = emotion_service.update_emotion(
+        emotion, 
+        body.get("emotion_name")
+    )
+    new_emotion_data = EmotionData(emotion.id, new_emotion_data_tensor)
+    db.session.delete(emotion.emotion_data)
+    db.session.commit()
+    db.session.add(new_emotion_data)
     db.session.commit()
     return success_response(emotion.serialize())
 
@@ -124,6 +132,7 @@ def update_emotion(emotion_id):
 def get_user_info():
     # will be easier with Google Authentication
     return success_response(g.oidc_token_info['sub'])
+
 
 @app.route("/download_model/")
 @oidc.accept_token(True)
@@ -151,6 +160,7 @@ def upload_status():
             emotion_name = emotion_service.idx_to_emotion[emotion.emotion_id]
     emotion_service.upload_status(user_id, emotion.aws_id, status, emotion_name)
     return success_response(status)
+
 
 @app.route("/upload_model/")
 @oidc.accept_token(True)
