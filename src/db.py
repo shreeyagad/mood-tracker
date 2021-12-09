@@ -3,6 +3,7 @@ from src.services.emotion_service import idx_to_emotion
 import datetime
 from datetime import date
 import random
+import numpy as np
 
 db = SQLAlchemy()
 
@@ -44,7 +45,9 @@ class Emotion(db.Model):
             'emotion_data': self.emotion_data.serialize(),
             'status': self.status,
             'user_id': self.user_id,
-            'date': str(self.date)
+            'date': str(self.date),
+            'year': str(self.year),
+            'month': str(self.month)
         }
     
     @staticmethod
@@ -110,7 +113,15 @@ class EmotionData(db.Model):
             "Surprise": self.surprise,
             "Sadness": self.sadness,
             "Joy": self.joy,
-            "Love": self.love
+            "Love": self.love,
+            "Data": [
+                self.anger,
+                self.fear,
+                self.surprise,
+                self.sadness,
+                self.joy, 
+                self.love
+            ]
         }
 
 

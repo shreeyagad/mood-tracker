@@ -2,12 +2,15 @@ import en_core_web_md
 import torch
 import torch.optim as optim
 import os
-from src.services.rnn import RNN
-# from rnn import RNN
+import src.services.rnn as rnn
+# import rnn
 import boto3
 import json
 import pickle
 import hashlib
+import botocore
+import collections
+import numpy as np
 
 idx_to_emotion = {
     0: "Anger",
@@ -19,8 +22,24 @@ idx_to_emotion = {
 }
 emotion_to_idx = {v: k for (k, v) in idx_to_emotion.items()}
 
+idx_to_month = {
+    1: "January",
+    2: "February",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December"
+}
+month_to_idx = {v: k for (k, v) in idx_to_month.items()}
+
 nlp = en_core_web_md.load()
-model = RNN(input_size=300, h=100, num_layers=1, output_dim=len(idx_to_emotion), dropout=0.1)
+model = rnn.RNN(input_size=300, h=100, num_layers=1, output_dim=len(idx_to_emotion), dropout=0.1)
 
 # Debugging root directory issues
 # print(os.getcwd())
@@ -53,13 +72,26 @@ s3 = boto3.client(
 bucket_name = 'mood-tracker-models'
 
 def pull_model_from_aws(user_id):
+    h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
     try:
-        h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
-        s3.download_file(bucket_name, f'model_{h_user_id}.pth', 'rnn_fixed.pth')
-        model.load_state_dict(torch.load('rnn_fixed.pth'))
-        return "Model downloaded successfully"
-    except BaseException as err:
-        return str(err)
+        print("downloaded user's model")
+        s3.download_file(bucket_name, f'model_{h_user_id}.pth', 'src/services/rnn_fixed.pth')
+    except botocore.exceptions.ClientError: # download base model if error
+        print("downloading BASE MODEL")
+        s3.download_file(bucket_name, 'base_emotion_model.pth', 'src/services/rnn_fixed.pth')
+    model.load_model('src/services/rnn_fixed.pth')
+    test_status = "Today I saw two stray cats sitting near my apartment, and they were just relaxing in the shade together. It was the cutest thing I had ever seen, and it made my day."
+    predicted, output_loss = classify_status(test_status)
+    assert (predicted == 2)
+    print(output_loss)
+    return "Model downloaded successfully"
+
+
+def push_model_to_aws(user_id):
+    h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
+    s3.upload_file('src/services/rnn_fixed.pth', bucket_name, f"model_{h_user_id}.pth")
+    return "Model uploaded successfully"
+
 
 def status_preprocessor(status):
     word_embeddings = []
@@ -82,12 +114,13 @@ def classify_status(status):
     predicted = int(predicted.squeeze())
     return predicted, output_loss.squeeze()
 
-def upload_status(user_id, aws_id, status, emotion_idx):
+def upload_status(user_id, aws_id, status, emotion_name):
+    print("uploading status")
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
     bucket_name = "mood-tracker-statuses"
 
     # save status to file
-    status_json = {"emotion_idx": emotion_idx, "status": status}
+    status_json = {"emotion": emotion_name, "status": status}
     status_file_name = f"{str(aws_id)}.json"
     with open(status_file_name, "w") as status_file:
         json.dump(status_json, status_file)
@@ -98,10 +131,34 @@ def upload_status(user_id, aws_id, status, emotion_idx):
     # delete file
     os.remove(status_file_name)
 
+    # update the model
+    print("calling update model")
+    update_model(status, emotion_name)
+
+
+def update_model(status, emotion_name):
+    processed_status = status_preprocessor(status)
+    training_data = [(processed_status, emotion_to_idx[emotion_name])] * 100
+    online_rnn_train_loader, _ = rnn.get_data_loaders(training_data, [], batch_size=1) 
+    online_optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+    model.train()
+    print("start training the model")
+    rnn.train_epoch_rnn(model, online_rnn_train_loader, online_optimizer)
+    model.save_model("src/services/rnn_fixed.pth")
+    model.eval()
+    print("done training the model")
+
+def update_emotion(emotion, emotion_name):
+    emotion_idx = emotion_to_idx[emotion_name]
+    emotion.emotion_id = emotion_idx
+    new_emotion_data_tensor = torch.zeros(len(idx_to_emotion))
+    new_emotion_data_tensor[emotion_idx] = 1
+    return new_emotion_data_tensor
+
 def delete_status(user_id, aws_id):
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
     bucket_name = "mood-tracker-statuses"
-    key = f"{h_user_id}/{str(aws_id)}.txt"
+    key = f"{h_user_id}/{str(aws_id)}.json"
     
     # delete status from bucket
     s3.delete_object(
@@ -109,3 +166,45 @@ def delete_status(user_id, aws_id):
         Key=key,
     )
 
+def organize_radar_data(emotions, year_month_dict):
+    radar_data = {k: collections.defaultdict(float) for k in emotion_to_idx.keys()}
+    years = ["2019", "2020", "2021"]
+    year_dict = {y: {m: [] for m in year_month_dict[y]} for y in years}
+    print('year_dict', year_dict)
+    for emotion in emotions:
+        d = emotion["emotion_data"]["Data"]
+        emotion_year, emotion_month = emotion["year"], idx_to_month[int(emotion["month"])]
+        year_dict[emotion_year][emotion_month].append(d)
+    for year, months in year_dict.items():
+        for month, month_data in months.items():
+            if len(month_data) == 0:
+                averaged_data = np.zeros(6)
+            else:
+                averaged_data = np.average(np.array(month_data), axis=0)
+            for i, val in enumerate(averaged_data):
+                key = month + " " + year
+                radar_data[idx_to_emotion[i]][key] = val
+    print("radar_data", radar_data)
+    final_data = []
+    for emotion_key, emotion_vals in radar_data.items():
+        temp_dict = {}
+        temp_dict["emotion"] = emotion_key
+        for k, v in emotion_vals.items():
+            temp_dict[k] = v
+        final_data.append(temp_dict)
+    
+    print("final_data", final_data)
+    return final_data 
+
+def test_organize_radar_data():
+    emotions = [{
+        "emotion_data": {"Data": np.array([0.5, 0.25, 0.25, 0, 0, 0])},
+        "month": "12"
+    },{
+        "emotion_data": {"Data": np.array([0.25, 0.5, 0, 0.25, 0, 0])},
+        "month": "11"
+    },
+    ]
+    print(organize_radar_data(emotions))
+
+# test_organize_radar_data()

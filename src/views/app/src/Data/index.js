@@ -48,7 +48,8 @@ const monthToMonthNum = {
 class Data extends React.Component {
     constructor(props) {
         super(props);
-        this.apiClient = null;
+        const accessToken = this.props.authState.accessToken.accessToken;
+        this.apiClient = new APIClient(accessToken);
         this.state = {
           emotions: [],
           aggregateData: [],
@@ -72,8 +73,6 @@ class Data extends React.Component {
     }
 
     componentDidMount = () => {
-      const accessToken = this.props.authState.accessToken.accessToken;
-      this.apiClient = new APIClient(accessToken);
       let today = new Date();
       let currentDay = [today.getFullYear(), today.getMonth()+1, today.getDate()];
       this.setState({currentDay: currentDay});
@@ -133,7 +132,7 @@ class Data extends React.Component {
       return (
           <div className={styles.root}>
             <Container>
-              <EmotionNav></EmotionNav>
+              <EmotionNav oktaAuth={this.props.oktaAuth} apiClient={this.apiClient}></EmotionNav>
               <BlinkingCursorTextBuilder
                   textStyle={{fontWeight :"bold", fontSize : 50}}
                   style={{marginTop:"10", marginBottom :"10px"}}

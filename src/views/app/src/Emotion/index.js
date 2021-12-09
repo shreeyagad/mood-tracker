@@ -73,7 +73,7 @@ class Emotion extends React.Component {
             </Col>
           </Row>
         </Card.Header>
-        <Card.Body onClick={this.handleClick} style={{paddingBottom: 0}}>
+        <Card.Body onClick={() => this.setState({show: !this.state.show})} style={{paddingBottom: 0}}>
           <Card.Text style={{display: 'flex', justifyContent: 'center'}}>
           <p>{this.props.emotion.status.slice(0,30) + "..."}</p>
             </Card.Text>

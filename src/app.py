@@ -48,6 +48,7 @@ def get_emotions_by_date(year, month, day):
         return failure_response("Emotion not found")
     return success_response([e.serialize() for e in emotions])
 
+
 @app.route("/emotions/<int:year>/<int:month>/")
 @oidc.accept_token(True)
 def get_emotions_by_yr_mo(year, month):
@@ -99,7 +100,7 @@ def delete_emotion(emotion_id):
     emotion = Emotion.get_by_emotion_id(emotion_id, user_id)
     if emotion is None:
         return failure_response("emotion not found")
-    emotion_service.delete_status(user_id, emotion_id)
+    emotion_service.delete_status(user_id, emotion.aws_id)
     db.session.delete(emotion)
     db.session.commit()
 
@@ -114,8 +115,14 @@ def update_emotion(emotion_id):
     if emotion is None:
         return failure_response("Emotion not found")
     body = json.loads(request.data)
-    status = body.get("status")
-    emotion.emotion_id = emotion_service.classify_status(status)
+    new_emotion_data_tensor = emotion_service.update_emotion(
+        emotion, 
+        body.get("emotion_name")
+    )
+    new_emotion_data = EmotionData(emotion.id, new_emotion_data_tensor)
+    db.session.delete(emotion.emotion_data)
+    db.session.commit()
+    db.session.add(new_emotion_data)
     db.session.commit()
     return success_response(emotion.serialize())
 
@@ -125,6 +132,7 @@ def update_emotion(emotion_id):
 def get_user_info():
     # will be easier with Google Authentication
     return success_response(g.oidc_token_info['sub'])
+
 
 @app.route("/download_model/")
 @oidc.accept_token(True)
@@ -149,11 +157,27 @@ def upload_status():
         if emotion is None:
             return failure_response("Emotion not found")
         else:
-            emotion_idx = emotion.emotion_id
-    else:
-        emotion_idx = emotion_service.emotion_to_idx[emotion_name]
-    emotion_service.upload_status(user_id, emotion.aws_id, status, emotion_idx)
+            emotion_name = emotion_service.idx_to_emotion[emotion.emotion_id]
+    emotion_service.upload_status(user_id, emotion.aws_id, status, emotion_name)
     return success_response(status)
+
+
+@app.route("/generate_radar_data/", methods=["POST"])
+@oidc.accept_token(True)
+def generate_radar_data():
+    user_id = g.oidc_token_info['sub']
+    body = json.loads(request.data)
+    emotions = []
+    years = ["2019", "2020", "2021"]
+    for year in years:
+        months = [emotion_service.month_to_idx[m] for m in body.get(year)]
+        for month in months:
+            emotions_by_month = Emotion.get_by_month_and_year(year, month, user_id)
+            for e in emotions_by_month:
+                emotions.append(e.serialize())
+    radar_data = emotion_service.organize_radar_data(emotions, body)
+    return success_response(radar_data)
+
 
 @app.route("/upload_model/")
 @oidc.accept_token(True)

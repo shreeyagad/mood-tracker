@@ -10,4 +10,6 @@ vagrant/a4keypair.pem
 .DS_Store
 node_modules
 .vscode
-rnn_fixed.pth
+src/services/rnn_fixed.pth
+lambda_function.py
+Dockerfile
