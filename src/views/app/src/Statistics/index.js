@@ -5,13 +5,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { withOktaAuth } from '@okta/okta-react';
 import Container from 'react-bootstrap/Container';
 import EmotionNav from "../EmotionNav";
-import Grid from '@material-ui/core/Grid';
-import Emotion from "../Emotion";
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 import { BlinkingCursorTextBuilder } from 'react-animated-text-builders';
 import Radar from "../Radar";
+import Form from 'react-bootstrap/Form';
+import { convertTokenParamsToOAuthParams } from '@okta/okta-auth-js';
 
 const styles = theme => ({
   root: {
@@ -34,6 +32,11 @@ const months = [
     'November',
     'December',
 ]
+const monthsToIndex = {}
+for (let i = 0; i < months.length; i++) {
+    let month = months[i];
+    monthsToIndex[month] = i;
+}
 
 const emotionToColor = {
     "Anger": "#e8c1a0",
@@ -48,51 +51,70 @@ const emotionToColor = {
 class Statistics extends React.Component {
     constructor(props) {
         super(props);
+        // this.state = {
+        //   year: 2021,
+        //   months: new Set(),
+        //   radarEmotionData: []
+        // };
+        let yearMonthPairs = {
+            2019: new Set(),
+            2020: new Set(),
+            2021: new Set()
+        }
         this.state = {
-          emotions: [],
-          year: 2021,
+            yearMonthPairs: yearMonthPairs,
+            radarEmotionData: []
         };
-    }
-
-    updateState = () => {
-        this.apiClient.getEmotionsByYear(this.state.year).then(
-            (data) => this.setState({...this.state, emotions: data.data})
-        );
+        this.handleChange = this.handleChange.bind(this);
+        this.getMonths = this.getMonths.bind(this);
     }
 
     componentDidMount() {
         const accessToken = this.props.authState.accessToken.accessToken;
         this.apiClient = new APIClient(accessToken);
-        this.apiClient.getEmotionsByYear(2021).then(
+    }
+
+    // handleChange = (month) => {
+    //     let tempMonths = this.state.months;
+    //     if (this.state.months.has(month)) {
+    //         tempMonths.delete(month);
+    //     }
+    //     else {
+    //         tempMonths.add(month);
+    //     }
+    //     this.apiClient.generateRadarData(this.state.year, tempMonths).then(
+    //         (data) => {
+    //             this.setState({radarEmotionData: data.data});
+    //             this.setState({months: tempMonths});
+    //         }
+    //     );
+    // }
+
+    handleChange = (year, month) => {
+        let tempPairs = this.state.yearMonthPairs;
+        if (tempPairs[year].has(month)) {
+            tempPairs[year].delete(month);
+        }
+        else {
+            tempPairs[year].add(month)
+        }
+        this.apiClient.generateRadarData(tempPairs).then(
             (data) => {
-                this.setState({...this.state, emotions: data.data});
+                console.log(data.data);
+                this.setState({radarEmotionData: data.data});
+                this.setState({yearMonthPairs: tempPairs});
             }
         );
     }
 
-    generateData() {
-        let emotionCounts = {
-            "Anger": 0,
-            "Fear": 0,
-            "Surprise": 0,
-            "Joy": 0,
-            "Love": 0,
-            "Sadness": 0,
-        }
-        for (const emotion of this.state.emotions) {
-            for (var e in emotionToColor) {
-                emotionCounts[e] += (emotion.emotion_data[e]/this.state.emotions.length);
-            }
-        }
-        return (
-            Object.keys(emotionCounts).map((emotion) => (
-                    {
-                        "emotion": emotion,
-                        "December": emotionCounts[emotion],
-                    }
-                )
-            )
-        )
+    getMonths() {
+        let tempMonths = [];
+        let tempPairs = this.state.yearMonthPairs;
+        Object.keys(tempPairs).forEach((year) => 
+            Array.from(tempPairs[year]).forEach(
+                (m) => tempMonths.push(m + " " + year)
+            ))
+        return tempMonths;
     }
 
     render() {
@@ -106,22 +128,32 @@ class Statistics extends React.Component {
                     cursorComponent={<div>|</div>}
                     blinkTimeAfterFinish={-1}>Statistics
                 </BlinkingCursorTextBuilder>
-                <ButtonGroup style={{paddingLeft: 100}}aria-label="Basic example">
-                    <DropdownButton variant="secondary" as={ButtonGroup} title="2019" id="bg-nested-dropdown" onClick={() => this.setState({ year: 2019 })}>
-                        { months.map((m) =>
-                        <Dropdown.Item eventKey={m}>{m}</Dropdown.Item>)}
-                    </DropdownButton>
-                    <DropdownButton variant="secondary" as={ButtonGroup} title="2020" id="bg-nested-dropdown" onClick={() => this.setState({ year: 2020 })}>
-                    { months.map((m) =>
-                        <Dropdown.Item eventKey={m}>{m}</Dropdown.Item>)}
-                    </DropdownButton>
-                    <DropdownButton variant="secondary" as={ButtonGroup} title="2021" id="bg-nested-dropdown" onClick={() => this.setState({ year: 2021 })}>
-                    { months.map((m) =>
-                        <Dropdown.Item eventKey={m}>{m}</Dropdown.Item>)}
-                    </DropdownButton>
-                </ButtonGroup>
+                {([2019, 2020, 2021]).map(year => {
+                    return (
+                    <Dropdown className="d-inline mx-2" autoClose="outside">
+                        <Dropdown.Toggle 
+                            onToggle={() => {this.setState({year: year})}} 
+                            variant="secondary" 
+                            id="dropdown-autoclose-outside"
+                        >
+                            {year}
+                        </Dropdown.Toggle>
+                        <Dropdown.Menu variant="dark">{
+                            months.map(month =>
+                            <Dropdown.Item as="button">
+                                <Form.Check 
+                                    type={"checkbox"}
+                                    id={month}
+                                    label={month}
+                                    onChange={() => this.handleChange(year, month)}
+                                />
+                            </Dropdown.Item>)
+                        }
+                        </Dropdown.Menu>
+                    </Dropdown>);}
+                )}
                 <div style={{height: 500, paddingBottom: 10}}>
-                <Radar data={this.generateData()} />
+                <Radar months={this.getMonths()} data={this.state.radarEmotionData} />
                 </div>
               </Container>
             </div>

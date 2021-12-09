@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const BASE_URI = 'http://localhost:4433';
-const BASE_URI = 'https://mood-tracker-sg.herokuapp.com';
+const BASE_URI = 'http://localhost:4433';
+// const BASE_URI = 'https://mood-tracker-sg.herokuapp.com';
 
 const client = axios.create({
  baseURL: BASE_URI,
@@ -68,6 +68,14 @@ class APIClient {
 
   uploadModel() {
     return this.perform('get', `/upload_model/`);
+  }
+
+  generateRadarData(yearMonthPairs) {
+    let apiData = {};
+    for (let y in yearMonthPairs) {
+      apiData[y] = Array.from(yearMonthPairs[y]); // python does not accept Set()
+    }
+    return this.perform('post', `/generate_radar_data/`, apiData);
   }
 
   async perform (method, resource, data) {

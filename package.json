@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@nivo/core": "^0.74.0",
-    "@nivo/radar": "^0.74.0",
+    "@nivo/radar": "^0.70.0",
     "@okta/okta-auth-js": "^4.8.0",
     "@okta/okta-react": "^5.1.0",
     "bootstrap-icons": "^1.6.0",

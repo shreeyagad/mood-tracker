@@ -162,6 +162,23 @@ def upload_status():
     return success_response(status)
 
 
+@app.route("/generate_radar_data/", methods=["POST"])
+@oidc.accept_token(True)
+def generate_radar_data():
+    user_id = g.oidc_token_info['sub']
+    body = json.loads(request.data)
+    emotions = []
+    years = ["2019", "2020", "2021"]
+    for year in years:
+        months = [emotion_service.month_to_idx[m] for m in body.get(year)]
+        for month in months:
+            emotions_by_month = Emotion.get_by_month_and_year(year, month, user_id)
+            for e in emotions_by_month:
+                emotions.append(e.serialize())
+    radar_data = emotion_service.organize_radar_data(emotions, body)
+    return success_response(radar_data)
+
+
 @app.route("/upload_model/")
 @oidc.accept_token(True)
 def upload_model():

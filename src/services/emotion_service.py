@@ -3,11 +3,14 @@ import torch
 import torch.optim as optim
 import os
 import src.services.rnn as rnn
+# import rnn
 import boto3
 import json
 import pickle
 import hashlib
 import botocore
+import collections
+import numpy as np
 
 idx_to_emotion = {
     0: "Anger",
@@ -18,6 +21,22 @@ idx_to_emotion = {
     5: "Surprise",
 }
 emotion_to_idx = {v: k for (k, v) in idx_to_emotion.items()}
+
+idx_to_month = {
+    1: "January",
+    2: "February",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December"
+}
+month_to_idx = {v: k for (k, v) in idx_to_month.items()}
 
 nlp = en_core_web_md.load()
 model = rnn.RNN(input_size=300, h=100, num_layers=1, output_dim=len(idx_to_emotion), dropout=0.1)
@@ -119,13 +138,15 @@ def upload_status(user_id, aws_id, status, emotion_name):
 
 def update_model(status, emotion_name):
     processed_status = status_preprocessor(status)
-    training_data = [(processed_status, emotion_to_idx[emotion_name])]
+    training_data = [(processed_status, emotion_to_idx[emotion_name])] * 100
     online_rnn_train_loader, _ = rnn.get_data_loaders(training_data, [], batch_size=1) 
     online_optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
     model.train()
+    print("start training the model")
     rnn.train_epoch_rnn(model, online_rnn_train_loader, online_optimizer)
     model.save_model("src/services/rnn_fixed.pth")
     model.eval()
+    print("done training the model")
 
 def update_emotion(emotion, emotion_name):
     emotion_idx = emotion_to_idx[emotion_name]
@@ -145,3 +166,45 @@ def delete_status(user_id, aws_id):
         Key=key,
     )
 
+def organize_radar_data(emotions, year_month_dict):
+    radar_data = {k: collections.defaultdict(float) for k in emotion_to_idx.keys()}
+    years = ["2019", "2020", "2021"]
+    year_dict = {y: {m: [] for m in year_month_dict[y]} for y in years}
+    print('year_dict', year_dict)
+    for emotion in emotions:
+        d = emotion["emotion_data"]["Data"]
+        emotion_year, emotion_month = emotion["year"], idx_to_month[int(emotion["month"])]
+        year_dict[emotion_year][emotion_month].append(d)
+    for year, months in year_dict.items():
+        for month, month_data in months.items():
+            if len(month_data) == 0:
+                averaged_data = np.zeros(6)
+            else:
+                averaged_data = np.average(np.array(month_data), axis=0)
+            for i, val in enumerate(averaged_data):
+                key = month + " " + year
+                radar_data[idx_to_emotion[i]][key] = val
+    print("radar_data", radar_data)
+    final_data = []
+    for emotion_key, emotion_vals in radar_data.items():
+        temp_dict = {}
+        temp_dict["emotion"] = emotion_key
+        for k, v in emotion_vals.items():
+            temp_dict[k] = v
+        final_data.append(temp_dict)
+    
+    print("final_data", final_data)
+    return final_data 
+
+def test_organize_radar_data():
+    emotions = [{
+        "emotion_data": {"Data": np.array([0.5, 0.25, 0.25, 0, 0, 0])},
+        "month": "12"
+    },{
+        "emotion_data": {"Data": np.array([0.25, 0.5, 0, 0.25, 0, 0])},
+        "month": "11"
+    },
+    ]
+    print(organize_radar_data(emotions))
+
+# test_organize_radar_data()

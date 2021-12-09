@@ -1,24 +1,44 @@
 import { ResponsiveRadar } from '@nivo/radar';
 
-function Radar(props) {
-    let months = [
-        'December',
-        // 'November',
-        // 'October',
-        // 'September',
-        // 'August',
-        // 'July',
-        // 'June',
-        // 'May',
-        // 'April',
-        // 'March',
-        // 'February',
-        // 'January'
-    ]
-    return (
+let data = [
+    {
+      "taste": "fruity",
+      "chardonay": 22,
+      "carmenere": 105,
+      "syrah": 51
+    },
+    {
+      "taste": "bitter",
+      "chardonay": 120,
+      "carmenere": 75,
+      "syrah": 39
+    },
+    {
+      "taste": "heavy",
+      "chardonay": 34,
+      "carmenere": 31,
+      "syrah": 32
+    },
+    {
+      "taste": "strong",
+      "chardonay": 101,
+      "carmenere": 38,
+      "syrah": 70
+    },
+    {
+      "taste": "sunny",
+      "chardonay": 84,
+      "carmenere": 24,
+      "syrah": 76
+    }
+  ]
+
+
+const Radar = (props) => {
+    return(
     <ResponsiveRadar
         data={props.data}
-        keys={months}
+        keys={props.months}
         indexBy="emotion"
         valueFormat=">-.2f"
         margin={{ top: 70, right: 80, bottom: 40, left: 80 }}
@@ -52,6 +72,5 @@ function Radar(props) {
             }
         ]}
     />
-    )
-}
+    )}
 export default Radar;
