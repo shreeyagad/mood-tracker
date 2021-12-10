@@ -191,3 +191,30 @@ def upload_model():
 
 
 ########################### end of routes ###########################
+
+########################### test routes ###########################
+
+@app.route("/test/emotions/", methods=["POST"])
+@oidc.accept_token(True)
+def create_test_emotion():
+    body = json.loads(request.data)
+    status = body.get("status")
+    date = body.get("date")
+    if not status:
+        return failure_response("Status not provided")
+    user_id = g.oidc_token_info['sub']
+    emotion_id, emotion_data = emotion_service.classify_status(status)
+    new_emotion = Emotion(
+        status=status, 
+        emotion_id=emotion_id, 
+        user_id=user_id,
+        date=date)
+    db.session.add(new_emotion)
+    db.session.commit()
+    new_emotion_data = EmotionData(
+        emotion_id=new_emotion.id,
+        emotion_data=emotion_data
+    )
+    db.session.add(new_emotion_data)
+    db.session.commit()
+    return success_response(new_emotion.serialize(), 201)

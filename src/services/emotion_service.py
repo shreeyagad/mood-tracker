@@ -73,24 +73,22 @@ bucket_name = 'mood-tracker-models'
 
 def pull_model_from_aws(user_id):
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
-    try:
-        print("downloaded user's model")
-        s3.download_file(bucket_name, f'model_{h_user_id}.pth', 'src/services/rnn_fixed.pth')
-    except botocore.exceptions.ClientError: # download base model if error
-        print("downloading BASE MODEL")
-        # s3.download_file(bucket_name, 'base_emotion_model.pth', 'src/services/rnn_fixed.pth')
-        s3.download_file(bucket_name, 'base_model_v2.pth', 'src/services/rnn_fixed.pth')
+    print("user_id!", h_user_id, user_id)
+    if not os.path.exists('src/services/rnn_fixed.pth'):
+        try:
+            print("downloaded user's model")
+            s3.download_file(bucket_name, f'model_{h_user_id}.pth', 'src/services/rnn_fixed.pth')
+        except botocore.exceptions.ClientError: # download base model if error
+            print("downloading base model because user's model DNE")
+            s3.download_file(bucket_name, 'base_model_v1.pth', 'src/services/rnn_fixed.pth')
     model.load_model('src/services/rnn_fixed.pth')
-    test_status = "Today I saw two stray cats sitting near my apartment, and they were just relaxing in the shade together. It was the cutest thing I had ever seen, and it made my day."
-    predicted, output_loss = classify_status(test_status)
-    assert (predicted == 2)
-    print(output_loss)
     return "Model downloaded successfully"
 
 
 def push_model_to_aws(user_id):
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
     s3.upload_file('src/services/rnn_fixed.pth', bucket_name, f"model_{h_user_id}.pth")
+    os.remove('src/services/rnn_fixed.pth')
     return "Model uploaded successfully"
 
 
@@ -103,6 +101,7 @@ def status_preprocessor(status):
     return word_embeddings
 
 def classify_status(status):
+    model.load_model('src/services/rnn_fixed.pth')
     vec_in = status_preprocessor(status)
     lengths = torch.Tensor([len(vec_in)])
     
@@ -138,11 +137,12 @@ def upload_status(user_id, aws_id, status, emotion_name):
 
 
 def update_model(status, emotion_name):
+    model.load_model('src/services/rnn_fixed.pth')
+    print(f"updating model with status: {status} and emotion: {emotion_name}")
     processed_status = status_preprocessor(status)
-    training_data = [(processed_status, emotion_to_idx[emotion_name])] * 100
-    online_rnn_train_loader, _ = rnn.get_data_loaders(training_data, [], batch_size=1) 
+    training_data = [(processed_status, emotion_to_idx[emotion_name])] * 128
+    online_rnn_train_loader, _ = rnn.get_data_loaders(training_data, [], batch_size=16) 
     online_optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-    model.train()
     print("start training the model")
     rnn.train_epoch_rnn(model, online_rnn_train_loader, online_optimizer)
     model.save_model("src/services/rnn_fixed.pth")

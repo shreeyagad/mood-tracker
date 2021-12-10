@@ -32,7 +32,7 @@ class Emotion(db.Model):
         self.aws_id = str(random.getrandbits(128))
         self.status = kwargs.get('status')
         self.user_id = kwargs.get('user_id')
-        self.date = date.today()
+        self.date = kwargs.get('date') if kwargs.get('date') else date.today()
         self.year = date.today().year
         self.month = date.today().month
         self.day = date.today().day
