@@ -117,10 +117,10 @@ class EmotionData(db.Model):
             "Data": [
                 self.anger,
                 self.fear,
-                self.surprise,
-                self.sadness,
                 self.joy, 
-                self.love
+                self.love,
+                self.sadness,
+                self.surprise
             ]
         }
 

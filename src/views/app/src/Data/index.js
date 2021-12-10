@@ -142,9 +142,9 @@ class Data extends React.Component {
               <h4 style={{textAlign: 'center', color: 'grey', marginBottom: 50}}>Click on day to see data.</h4>
               <Container>
                 <Row>
-                  <Col sm={4} style={{padding: 0}}><Calendar style={{fontFamily: 'inherit'}} onClickDay={this.handleClickDay}/></Col>
-                  <Col sm={6}><Container style={{height: 400, position: 'relative', left: -100}}><PieChart data={this.state.aggregateData}/></Container></Col>
-                  <Col sm={2} style={{position: 'relative', left: -150}}>
+                  <Col sm={4} style={{height: 400, padding: 0}}><Calendar style={{fontFamily: 'inherit'}} onClickDay={this.handleClickDay}/></Col>
+                  <Col sm={4}><Container style={{position: 'relative',width:600, left:-100, height: 400 }}><PieChart data={this.state.aggregateData}/></Container></Col>
+                  <Col sm={4} style={{height: 375, paddingLeft:80, overflowY: 'scroll'}}>
                     { this.renderEmotions(this.state.emotions) }
                   </Col>
                 </Row>

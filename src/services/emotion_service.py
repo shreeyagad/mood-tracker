@@ -78,7 +78,8 @@ def pull_model_from_aws(user_id):
         s3.download_file(bucket_name, f'model_{h_user_id}.pth', 'src/services/rnn_fixed.pth')
     except botocore.exceptions.ClientError: # download base model if error
         print("downloading BASE MODEL")
-        s3.download_file(bucket_name, 'base_emotion_model.pth', 'src/services/rnn_fixed.pth')
+        # s3.download_file(bucket_name, 'base_emotion_model.pth', 'src/services/rnn_fixed.pth')
+        s3.download_file(bucket_name, 'base_model_v2.pth', 'src/services/rnn_fixed.pth')
     model.load_model('src/services/rnn_fixed.pth')
     test_status = "Today I saw two stray cats sitting near my apartment, and they were just relaxing in the shade together. It was the cutest thing I had ever seen, and it made my day."
     predicted, output_loss = classify_status(test_status)
@@ -172,6 +173,7 @@ def organize_radar_data(emotions, year_month_dict):
     year_dict = {y: {m: [] for m in year_month_dict[y]} for y in years}
     print('year_dict', year_dict)
     for emotion in emotions:
+        print(emotion)
         d = emotion["emotion_data"]["Data"]
         emotion_year, emotion_month = emotion["year"], idx_to_month[int(emotion["month"])]
         year_dict[emotion_year][emotion_month].append(d)
