@@ -121,7 +121,7 @@ def delete_emotion(emotion_id, offset):
     return success_response(emotion.serialize(offset))
 
 
-@app.route("/emotions/<int:emotion_id>/<int:offset>", methods=["PUT"])
+@app.route("/emotions/<int:emotion_id>/<int:offset>/", methods=["PUT"])
 @oidc.accept_token(True)
 def update_emotion(emotion_id, offset):
     user_id = g.oidc_token_info['sub']
