@@ -1,9 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from src.services.emotion_service import idx_to_emotion
 import datetime
-from datetime import date
+from datetime import timezone, datetime, timedelta, date
 import random
-import numpy as np
 
 db = SQLAlchemy()
 
@@ -13,10 +12,7 @@ class Emotion(db.Model):
     emotion_id = db.Column(db.Integer, nullable=False)
     aws_id = db.Column(db.String(128), nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    year = db.Column(db.Integer, nullable=False)
-    month = db.Column(db.Integer, nullable=False)
-    day = db.Column(db.Integer, nullable=False)
+    date_time = db.Column(db.DateTime, nullable=False)
     status = db.Column(db.String(500), nullable=False)
     
     emotion_data = db.relationship(
@@ -32,13 +28,12 @@ class Emotion(db.Model):
         self.aws_id = str(random.getrandbits(128))
         self.status = kwargs.get('status')
         self.user_id = kwargs.get('user_id')
-        print("today's date: ", date.today())
-        self.date = kwargs.get('date') if kwargs.get('date') else date.today()
-        self.year = date.today().year
-        self.month = date.today().month
-        self.day = date.today().day
+        self.date_time = datetime.now(timezone.utc)
     
-    def serialize(self):
+    def serialize(self, offset):
+        # return in user's timezone
+        time_offset = timedelta(minutes=offset)
+        user_date_time = self.date_time-time_offset
         return {
             'id': self.id,
             'emotion': idx_to_emotion[self.emotion_id],
@@ -46,9 +41,10 @@ class Emotion(db.Model):
             'emotion_data': self.emotion_data.serialize(),
             'status': self.status,
             'user_id': self.user_id,
-            'date': str(self.date),
-            'year': str(self.year),
-            'month': str(self.month)
+            'date_time': str(user_date_time),
+            'date': str(user_date_time.date()),
+            'year': str(user_date_time.date().year),
+            'month': str(user_date_time.date().month)
         }
     
     @staticmethod
@@ -56,32 +52,38 @@ class Emotion(db.Model):
         return Emotion.query.filter_by(id=emotion_id, user_id=user_id).first()
 
     @staticmethod
-    def get_by_date(year, month, day, user_id):
-        return Emotion.query.filter_by(
-            year=year, 
-            month=month, 
-            day=day, 
-            user_id=user_id
+    def get_by_date(year, month, day, offset, user_id):
+        time_offset = timedelta(minutes=offset)
+        emotions = Emotion.query.filter(
+            Emotion.user_id == user_id
         )
+        emotions = list(filter(lambda e: (e.date_time-time_offset).year == int(year), emotions))
+        emotions = list(filter(lambda e: (e.date_time-time_offset).month == int(month), emotions))
+        emotions = list(filter(lambda e: (e.date_time-time_offset).day == int(day), emotions))
+        return emotions
     
     @staticmethod
-    def get_by_month_and_year(year, month, user_id):
-        return Emotion.query.filter_by(
-            year=year, 
-            month=month, 
-            user_id=user_id
+    def get_by_month_and_year(year, month, offset, user_id):
+        time_offset = timedelta(minutes=offset)
+        emotions = Emotion.query.filter(
+            Emotion.user_id == user_id
         )
+        emotions = list(filter(lambda e: (e.date_time-time_offset).year == int(year), emotions))
+        emotions = list(filter(lambda e: (e.date_time-time_offset).month == int(month), emotions))
+        return emotions
     
     @staticmethod
-    def get_by_year(year, user_id):
-        return Emotion.query.filter_by(
-            year=year, 
-            user_id=user_id
+    def get_by_year(year, offset, user_id):
+        time_offset = timedelta(minutes=offset)
+        emotions = Emotion.query.filter(
+            Emotion.user_id == user_id
         )
+        emotions = list(filter(lambda e: (e.date_time-time_offset).year == int(year), emotions))
+        return emotions
 
     @staticmethod
     def get_all(user_id):
-        return Emotion.query.filter(user_id=user_id)
+        return Emotion.query.filter_by(user_id=user_id)
 
 
 class EmotionData(db.Model):

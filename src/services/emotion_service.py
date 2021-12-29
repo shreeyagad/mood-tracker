@@ -73,7 +73,6 @@ bucket_name = 'mood-tracker-models'
 
 def pull_model_from_aws(user_id):
     h_user_id = hashlib.md5(bytes(user_id, 'utf-8')).hexdigest()
-    print("user_id!", h_user_id, user_id)
     if not os.path.exists('src/services/rnn_fixed.pth'):
         try:
             print("downloaded user's model")
@@ -171,9 +170,7 @@ def organize_radar_data(emotions, year_month_dict):
     radar_data = {k: collections.defaultdict(float) for k in emotion_to_idx.keys()}
     years = ["2019", "2020", "2021"]
     year_dict = {y: {m: [] for m in year_month_dict[y]} for y in years}
-    print('year_dict', year_dict)
     for emotion in emotions:
-        print(emotion)
         d = emotion["emotion_data"]["Data"]
         emotion_year, emotion_month = emotion["year"], idx_to_month[int(emotion["month"])]
         year_dict[emotion_year][emotion_month].append(d)
@@ -186,7 +183,6 @@ def organize_radar_data(emotions, year_month_dict):
             for i, val in enumerate(averaged_data):
                 key = month + " " + year
                 radar_data[idx_to_emotion[i]][key] = val
-    print("radar_data", radar_data)
     final_data = []
     for emotion_key, emotion_vals in radar_data.items():
         temp_dict = {}
@@ -194,19 +190,4 @@ def organize_radar_data(emotions, year_month_dict):
         for k, v in emotion_vals.items():
             temp_dict[k] = v
         final_data.append(temp_dict)
-    
-    print("final_data", final_data)
     return final_data 
-
-def test_organize_radar_data():
-    emotions = [{
-        "emotion_data": {"Data": np.array([0.5, 0.25, 0.25, 0, 0, 0])},
-        "month": "12"
-    },{
-        "emotion_data": {"Data": np.array([0.25, 0.5, 0, 0.25, 0, 0])},
-        "month": "11"
-    },
-    ]
-    print(organize_radar_data(emotions))
-
-# test_organize_radar_data()

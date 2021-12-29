@@ -2,6 +2,7 @@ import axios from 'axios';
 
 // const BASE_URI = 'http://localhost:4433';
 const BASE_URI = 'https://mood-tracker-sg.herokuapp.com';
+// const BASE_URI = 'http://0.0.0.0:5000';
 
 const client = axios.create({
  baseURL: BASE_URI,
@@ -23,38 +24,40 @@ const monthToMonthNum = {
   "Dec": "12",
 };
 
+const offset = new Date().getTimezoneOffset();
+
 class APIClient {
   constructor(accessToken) {
     this.accessToken = accessToken;
   }
 
   createEmotion(emotion) {
-    return this.perform('post', '/emotions/', emotion);
+    return this.perform('post', `/emotions/${offset}/`, emotion);
+  }
+
+  getEmotions() {
+    return this.perform('get', `/emotions/${offset}/`);
   }
 
   updateEmotion(emotion_id, emotion_name) {
     let obj = Object({"emotion_name": emotion_name});
-    return this.perform('put', `/emotions/${emotion_id}/`, obj);
+    return this.perform('put', `/emotions/${emotion_id}/${offset}/`, obj);
   }
 
   deleteEmotion(emotion_id) {
-    return this.perform('delete', `/emotions/${emotion_id}/`);
-  }
-
-  getEmotions() {
-    return this.perform('get', `/emotions/`);
+    return this.perform('delete', `/emotions/${emotion_id}/${offset}/`);
   }
 
   getEmotionsByDate(year, month, day) {
-    return this.perform('get', `/emotions/${year}/${month}/${day}/`);
+    return this.perform('get', `/emotions/${year}/${month}/${day}/${offset}/`);
   }
 
   getEmotionsByMonthAndYear(year, month) {
-    return this.perform('get', `/emotions/${year}/${month}/`);
+    return this.perform('get', `/emotions/${year}/${month}/${offset}/`);
   }
 
   getEmotionsByYear(year) {
-    return this.perform('get', `/emotions/${year}/`);
+    return this.perform('get', `/emotions/${year}/${offset}/`);
   }
 
   downloadModel() {
@@ -75,7 +78,7 @@ class APIClient {
     for (let y in yearMonthPairs) {
       apiData[y] = Array.from(yearMonthPairs[y]); // python does not accept Set()
     }
-    return this.perform('post', `/generate_radar_data/`, apiData);
+    return this.perform('post', `/generate_radar_data/${offset}/`, apiData);
   }
 
   async perform (method, resource, data) {

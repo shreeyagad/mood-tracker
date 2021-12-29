@@ -8,6 +8,7 @@ from src.services.endpoint_service import (
     failure_response,
 )
 import os
+import datetime
 
 app = Flask(
     __name__, 
@@ -39,39 +40,52 @@ def not_found(e):
     return app.send_static_file('index.html')
 
 
-@app.route("/emotions/<int:year>/<int:month>/<int:day>/")
+@app.route("/emotions/<int:year>/<int:month>/<int:day>/<int:offset>/")
 @oidc.accept_token(True)
-def get_emotions_by_date(year, month, day):
+def get_emotions_by_date(year, month, day, offset): # timezone offset in sec
     user_id = g.oidc_token_info['sub']
-    emotions = Emotion.get_by_date(year=year, month=month, day=day, user_id=user_id) 
+    emotions = Emotion.get_by_date(
+        year=year, 
+        month=month, 
+        day=day, 
+        offset=offset,
+        user_id=user_id)
     if emotions is None:
         return failure_response("Emotion not found")
-    return success_response([e.serialize() for e in emotions])
+    return success_response([e.serialize(offset) for e in emotions])
 
 
-@app.route("/emotions/<int:year>/<int:month>/")
+@app.route("/emotions/<int:year>/<int:month>/<int:offset>/")
 @oidc.accept_token(True)
-def get_emotions_by_yr_mo(year, month):
+def get_emotions_by_yr_mo(year, month, offset):
     user_id = g.oidc_token_info['sub']
-    emotions = Emotion.get_by_month_and_year(year=year, month=month, user_id=user_id) 
+    emotions = Emotion.get_by_month_and_year(year=year, month=month, offset=offset, user_id=user_id) 
     if emotions is None:
         return failure_response("Emotion not found")
-    return success_response([e.serialize() for e in emotions])
+    return success_response([e.serialize(offset) for e in emotions])
 
 
-@app.route("/emotions/<int:year>/")
+@app.route("/emotions/<int:year>/<int:offset>/")
 @oidc.accept_token(True)
-def get_emotions_by_yr(year):
+def get_emotions_by_yr(year, offset):
     user_id = g.oidc_token_info['sub']
-    emotions = Emotion.get_by_year(year=year, user_id=user_id) 
+    emotions = Emotion.get_by_year(year=year, offset=offset, user_id=user_id) 
     if emotions is None:
         return failure_response("Emotion not found")
-    return success_response([e.serialize() for e in emotions])
+    return success_response([e.serialize(offset) for e in emotions])
 
 
-@app.route("/emotions/", methods=["POST"])
+@app.route("/emotions/<int:offset>/")
 @oidc.accept_token(True)
-def create_emotion():
+def get_emotions(offset):
+    user_id = g.oidc_token_info['sub']
+    emotions = Emotion.get_all(user_id=user_id)
+    return success_response([e.serialize(offset) for e in emotions])
+
+
+@app.route("/emotions/<int:offset>/", methods=["POST"])
+@oidc.accept_token(True)
+def create_emotion(offset):
     body = json.loads(request.data)
     status = body.get("status")
     if not status:
@@ -90,12 +104,12 @@ def create_emotion():
     )
     db.session.add(new_emotion_data)
     db.session.commit()
-    return success_response(new_emotion.serialize(), 201)
+    return success_response(new_emotion.serialize(offset), 201)
 
 
-@app.route("/emotions/<int:emotion_id>/", methods=["DELETE"])
+@app.route("/emotions/<int:emotion_id>/<int:offset>/", methods=["DELETE"])
 @oidc.accept_token(True)
-def delete_emotion(emotion_id):
+def delete_emotion(emotion_id, offset):
     user_id = g.oidc_token_info['sub']
     emotion = Emotion.get_by_emotion_id(emotion_id, user_id)
     if emotion is None:
@@ -104,12 +118,12 @@ def delete_emotion(emotion_id):
     db.session.delete(emotion)
     db.session.commit()
 
-    return success_response(emotion.serialize())
+    return success_response(emotion.serialize(offset))
 
 
-@app.route("/emotions/<int:emotion_id>/", methods=["PUT"])
+@app.route("/emotions/<int:emotion_id>/<int:offset>", methods=["PUT"])
 @oidc.accept_token(True)
-def update_emotion(emotion_id):
+def update_emotion(emotion_id, offset):
     user_id = g.oidc_token_info['sub']
     emotion = Emotion.get_by_emotion_id(emotion_id, user_id)
     if emotion is None:
@@ -124,14 +138,7 @@ def update_emotion(emotion_id):
     db.session.commit()
     db.session.add(new_emotion_data)
     db.session.commit()
-    return success_response(emotion.serialize())
-
-
-@app.route("/user/")
-@oidc.accept_token(True)
-def get_user_info():
-    # will be easier with Google Authentication
-    return success_response(g.oidc_token_info['sub'])
+    return success_response(emotion.serialize(offset))
 
 
 @app.route("/download_model/")
@@ -162,9 +169,9 @@ def upload_status():
     return success_response(status)
 
 
-@app.route("/generate_radar_data/", methods=["POST"])
+@app.route("/generate_radar_data/<int:offset>/", methods=["POST"])
 @oidc.accept_token(True)
-def generate_radar_data():
+def generate_radar_data(offset):
     user_id = g.oidc_token_info['sub']
     body = json.loads(request.data)
     emotions = []
@@ -172,9 +179,10 @@ def generate_radar_data():
     for year in years:
         months = [emotion_service.month_to_idx[m] for m in body.get(year)]
         for month in months:
-            emotions_by_month = Emotion.get_by_month_and_year(year, month, user_id)
+            emotions_by_month = Emotion.get_by_month_and_year(
+                year, month, offset, user_id)
             for e in emotions_by_month:
-                emotions.append(e.serialize())
+                emotions.append(e.serialize(offset))
     radar_data = emotion_service.organize_radar_data(emotions, body)
     return success_response(radar_data)
 
@@ -191,30 +199,3 @@ def upload_model():
 
 
 ########################### end of routes ###########################
-
-########################### test routes ###########################
-
-@app.route("/test/emotions/", methods=["POST"])
-@oidc.accept_token(True)
-def create_test_emotion():
-    body = json.loads(request.data)
-    status = body.get("status")
-    date = body.get("date")
-    if not status:
-        return failure_response("Status not provided")
-    user_id = g.oidc_token_info['sub']
-    emotion_id, emotion_data = emotion_service.classify_status(status)
-    new_emotion = Emotion(
-        status=status, 
-        emotion_id=emotion_id, 
-        user_id=user_id,
-        date=date)
-    db.session.add(new_emotion)
-    db.session.commit()
-    new_emotion_data = EmotionData(
-        emotion_id=new_emotion.id,
-        emotion_data=emotion_data
-    )
-    db.session.add(new_emotion_data)
-    db.session.commit()
-    return success_response(new_emotion.serialize(), 201)

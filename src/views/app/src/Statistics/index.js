@@ -9,7 +9,6 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { BlinkingCursorTextBuilder } from 'react-animated-text-builders';
 import Radar from "../Radar";
 import Form from 'react-bootstrap/Form';
-import { convertTokenParamsToOAuthParams } from '@okta/okta-auth-js';
 
 const styles = theme => ({
   root: {
@@ -51,11 +50,6 @@ const emotionToColor = {
 class Statistics extends React.Component {
     constructor(props) {
         super(props);
-        // this.state = {
-        //   year: 2021,
-        //   months: new Set(),
-        //   radarEmotionData: []
-        // };
         let yearMonthPairs = {
             2019: new Set(),
             2020: new Set(),
@@ -74,22 +68,6 @@ class Statistics extends React.Component {
         this.apiClient = new APIClient(accessToken);
     }
 
-    // handleChange = (month) => {
-    //     let tempMonths = this.state.months;
-    //     if (this.state.months.has(month)) {
-    //         tempMonths.delete(month);
-    //     }
-    //     else {
-    //         tempMonths.add(month);
-    //     }
-    //     this.apiClient.generateRadarData(this.state.year, tempMonths).then(
-    //         (data) => {
-    //             this.setState({radarEmotionData: data.data});
-    //             this.setState({months: tempMonths});
-    //         }
-    //     );
-    // }
-
     handleChange = (year, month) => {
         let tempPairs = this.state.yearMonthPairs;
         if (tempPairs[year].has(month)) {
@@ -100,7 +78,6 @@ class Statistics extends React.Component {
         }
         this.apiClient.generateRadarData(tempPairs).then(
             (data) => {
-                console.log(data.data);
                 this.setState({radarEmotionData: data.data});
                 this.setState({yearMonthPairs: tempPairs});
             }
