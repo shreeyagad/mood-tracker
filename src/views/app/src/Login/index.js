@@ -10,6 +10,14 @@ class Login extends React.Component {
   constructor(props) {
     super(props);
     this.login = this.login.bind(this);
+    this.loginAsGuest = this.loginAsGuest.bind(this);
+    this.state = {
+      isGuest: false,
+    }
+  }
+
+  async loginAsGuest() {
+    this.setState({isGuest: true});
   }
 
   async login() {
@@ -17,8 +25,8 @@ class Login extends React.Component {
   }
 
   render() {
-    if (this.props.authState.isAuthenticated) {
-      return <Redirect to='/home' />
+    if (this.props.authState.isAuthenticated || this.state.isGuest) {
+      return <Redirect to={{pathname: '/home', state: { unauthenticated: this.state.isGuest} }} />
     } else {
       return (
         <Container>
@@ -30,8 +38,9 @@ class Login extends React.Component {
             blinkTimeAfterFinish={-1}>Welcome  to  Mood  Tracker
             </BlinkingCursorTextBuilder>
           </div>
-          <div style={{textAlign: 'center', alignItems: 'center', justifyContent: 'center'}}>
-            <Button style={{marginTop: 20}} size="lg" variant="light" onClick={this.login}>Login with Okta</Button>
+          <div style={{marginTop: 30, textAlign: 'center'}}>
+            <Button style={{margin: 10}} size="lg" variant="primary" onClick={this.login}>Login with Okta</Button>
+            <Button style={{margin: 10}} size="lg" variant="secondary" onClick={this.loginAsGuest}>Continue as Guest</Button>
           </div>
         </Container>
       )

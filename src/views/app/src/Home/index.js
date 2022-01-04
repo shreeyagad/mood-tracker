@@ -35,6 +35,7 @@ const emotionToColor = {
 class Home extends React.Component {
   constructor(props) {
     super(props);
+    this.unauthenticated = this.props.location.state.unauthenticated;
     this.state = {
       value: 0,
       emotions: [],
@@ -42,8 +43,13 @@ class Home extends React.Component {
       show: false,
       disagreeShow: false,
     };
-    const accessToken = this.props.authState.accessToken.accessToken;
-    this.apiClient = new APIClient(accessToken);
+    if (this.unauthenticated) {
+      this.apiClient = new APIClient();
+    }
+    else {
+      const accessToken = this.props.authState.accessToken.accessToken;
+      this.apiClient = new APIClient(accessToken);
+    }
     
     this.showModal =  this.showModal.bind(this);
     this.generateModal = this.generateModal.bind(this);
@@ -148,7 +154,7 @@ class Home extends React.Component {
     return (
       <div className={styles.root}>
         <Container>
-          <EmotionNav oktaAuth={this.props.oktaAuth} apiClient={this.apiClient}></EmotionNav>
+          <EmotionNav unauthenticated={this.unauthenticated} oktaAuth={this.props.oktaAuth} apiClient={this.apiClient}></EmotionNav>
           <BlinkingCursorTextBuilder
             textStyle={{fontWeight :"bold", fontSize : "50px"}}
             style={{marginTop:"200px", marginBottom :"10px"}}
