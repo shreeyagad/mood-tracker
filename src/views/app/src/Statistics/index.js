@@ -51,9 +51,9 @@ class Statistics extends React.Component {
     constructor(props) {
         super(props);
         let yearMonthPairs = {
-            2019: new Set(),
             2020: new Set(),
-            2021: new Set()
+            2021: new Set(),
+            2022: new Set()
         }
         this.state = {
             yearMonthPairs: yearMonthPairs,
@@ -103,7 +103,7 @@ class Statistics extends React.Component {
                     cursorComponent={<div>|</div>}
                     blinkTimeAfterFinish={-1}>Statistics
                 </BlinkingCursorTextBuilder>
-                {([2019, 2020, 2021]).map(year => {
+                {([2020, 2021, 2022]).map(year => {
                     return (
                     <Dropdown className="d-inline mx-2" autoClose="outside">
                         <Dropdown.Toggle 

@@ -168,7 +168,7 @@ def delete_status(user_id, aws_id):
 
 def organize_radar_data(emotions, year_month_dict):
     radar_data = {k: collections.defaultdict(float) for k in emotion_to_idx.keys()}
-    years = ["2019", "2020", "2021"]
+    years = ["2020", "2021", "2022"]
     year_dict = {y: {m: [] for m in year_month_dict[y]} for y in years}
     for emotion in emotions:
         d = emotion["emotion_data"]["Data"]

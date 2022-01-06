@@ -185,7 +185,7 @@ def generate_radar_data(offset):
     user_id = g.oidc_token_info['sub']
     body = json.loads(request.data)
     emotions = []
-    years = ["2019", "2020", "2021"]
+    years = ["2020", "2021", "2022"]
     for year in years:
         months = [emotion_service.month_to_idx[m] for m in body.get(year)]
         for month in months:
