@@ -84,7 +84,7 @@ class Home extends React.Component {
     this.setState({disagreeShow: false});
     let emotion_id = this.state.currEmotion.id;
     let status = this.state.currEmotion.status;
-    this.apiClient.uploadStatus(emotion_id, status, emotion_name);
+    // this.apiClient.uploadStatus(emotion_id, status, emotion_name);
     if (emotion_name !== null) {
       this.apiClient.updateEmotion(emotion_id, emotion_name);
     }

@@ -48,6 +48,10 @@ class APIClient {
     return this.perform('delete', `/emotions/${emotion_id}/${offset}/`);
   }
 
+  deleteAllEmotions() {
+    return this.perform('delete', `/emotions/${offset}/`);
+  }
+
   getEmotionsByDate(year, month, day) {
     return this.perform('get', `/emotions/${year}/${month}/${day}/${offset}/`);
   }

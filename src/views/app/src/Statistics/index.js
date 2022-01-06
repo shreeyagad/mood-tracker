@@ -59,13 +59,11 @@ class Statistics extends React.Component {
             yearMonthPairs: yearMonthPairs,
             radarEmotionData: []
         };
-        this.handleChange = this.handleChange.bind(this);
-        this.getMonths = this.getMonths.bind(this);
-    }
-
-    componentDidMount() {
         const accessToken = this.props.authState.accessToken.accessToken;
         this.apiClient = new APIClient(accessToken);
+
+        this.handleChange = this.handleChange.bind(this);
+        this.getMonths = this.getMonths.bind(this);
     }
 
     handleChange = (year, month) => {
