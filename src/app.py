@@ -8,7 +8,6 @@ from src.services.endpoint_service import (
     failure_response,
 )
 import os
-import datetime
 
 app = Flask(
     __name__, 
@@ -119,6 +118,17 @@ def delete_emotion(emotion_id, offset):
     db.session.commit()
 
     return success_response(emotion.serialize(offset))
+
+
+@app.route("/emotions/<int:offset>/", methods=["DELETE"])
+@oidc.accept_token(True)
+def delete_all_emotions(offset):
+    user_id = g.oidc_token_info['sub']
+    emotions = Emotion.get_all(user_id)
+    for emotion in emotions:
+        db.session.delete(emotion)
+        db.session.commit()
+    return success_response([emotion.serialize(offset) for emotion in emotions])
 
 
 @app.route("/emotions/<int:emotion_id>/<int:offset>/", methods=["PUT"])

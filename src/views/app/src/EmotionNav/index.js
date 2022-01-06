@@ -1,77 +1,72 @@
 import React from 'react';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
+import NavDropdown from 'react-bootstrap/NavDropdown';
+import Dropdown from 'react-bootstrap/Dropdown';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-import { Redirect } from 'react-router-dom';
-import { Link } from 'react';
-
+// import { TransitionGroup, CSSTransition } from "react-transition-group";
 
 class EmotionNav extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      isGuest: false,
+      userName: ""
     };
     this.logout = this.logout.bind(this);
-}
+  }
 
   logout = (e) => {
     e.preventDefault();
-    if (this.props.unauthenticated) {
-      this.setState({isGuest: true});
+    if (this.state.userName == "Guest") {
+      this.props.apiClient.deleteAllEmotions().then((value) => {
+        this.props.oktaAuth.signOut();
+      });
     }
     else {
-    this.props.apiClient.uploadModel().then((value) => {
+      this.props.apiClient.uploadModel().then((value) => {
         this.props.oktaAuth.signOut();
       });
     }
   }
 
+  componentDidMount() {
+    this.props.oktaAuth.getUser().then((user) => {
+      if (user["family_name"] != "Guest") {
+        this.setState({userName: user["name"]});
+      }
+      else {
+        this.setState({userName: "Guest"});
+      }
+    });
+  }
+
   render() {
-    if (this.state.isGuest) {
-      return <Redirect to='/' />
-    }
-    else {
-      return (
-          <Navbar bg="light" expand="lg" style={{marginBottom: 50, marginTop: 10}}>
-          <Container>
-            <Navbar.Brand 
-              // as={Link}
-              // href="/home"
-              to={{
-                pathname: '/home',
-                state: { unauthenticated: this.props.unauthenticated},
-              }}>Mood Tracker</Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-              <Nav className="me-auto">
-                <Nav.Link
-                  // as={Link}
-                  // href="/data"
-                  to={{
-                    pathname: '/data',
-                    state: { unauthenticated: this.props.unauthenticated},
-                  }}>Data
-                </Nav.Link>
-                <Nav.Link
-                  // as={Link}
-                  // href="/statistics"
-                  to={{
-                    pathname: '/statistics',
-                    state: { unauthenticated: this.props.unauthenticated},
-                  }}>Statistics
-                </Nav.Link>
-              </Nav>
-              <Nav>
-                <Button variant="light" onClick={this.logout} style={{float: 'right'}}>Log Out</Button>
-              </Nav>
-            </Navbar.Collapse>
-          </Container>
-        </Navbar>
-      );
-    }
+    return (
+        <Navbar bg="light" expand="lg" style={{marginBottom: 50, marginTop: 10}}>
+        <Container>
+          <Navbar.Brand href="\home">Mood Tracker</Navbar.Brand>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="me-auto">
+              <Nav.Link href="/data">Data</Nav.Link>
+              <Nav.Link href="/statistics">Statistics</Nav.Link>
+            </Nav>
+            <Dropdown as={Nav.Item}>
+              <Dropdown.Toggle as={Nav.Link} style={{
+                color: "black"
+                }}>
+{this.state.userName}
+              </Dropdown.Toggle>
+              <Dropdown.Menu align="end" style={{minWidth: "5rem", right: "10%"}}>
+                <NavDropdown.Item as={Button} onClick={this.logout}>Log Out</NavDropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+    );
   }
 }
 

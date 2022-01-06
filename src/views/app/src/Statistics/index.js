@@ -50,7 +50,6 @@ const emotionToColor = {
 class Statistics extends React.Component {
     constructor(props) {
         super(props);
-        this.unauthenticated = this.props.location.state.unauthenticated;
         let yearMonthPairs = {
             2019: new Set(),
             2020: new Set(),
@@ -60,18 +59,11 @@ class Statistics extends React.Component {
             yearMonthPairs: yearMonthPairs,
             radarEmotionData: []
         };
+        const accessToken = this.props.authState.accessToken.accessToken;
+        this.apiClient = new APIClient(accessToken);
+
         this.handleChange = this.handleChange.bind(this);
         this.getMonths = this.getMonths.bind(this);
-    }
-
-    componentDidMount() {
-        if (this.unauthenticated) {
-            const accessToken = this.props.authState.accessToken.accessToken;
-            this.apiClient = new APIClient(accessToken); 
-        }
-        else {
-            this.apiClient = new APIClient();
-        }
     }
 
     handleChange = (year, month) => {
@@ -104,7 +96,7 @@ class Statistics extends React.Component {
         return (
             <div className={styles.root}>
               <Container>
-                <EmotionNav unauthenticated={this.unauthenticated} oktaAuth={this.props.oktaAuth} apiClient={this.apiClient}></EmotionNav>
+                <EmotionNav oktaAuth={this.props.oktaAuth} apiClient={this.apiClient}></EmotionNav>
                 <BlinkingCursorTextBuilder
                     textStyle={{fontWeight :"bold", fontSize : "50px"}}
                     style={{marginTop:"10", marginBottom :"10px"}}

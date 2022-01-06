@@ -48,15 +48,8 @@ const monthToMonthNum = {
 class Data extends React.Component {
     constructor(props) {
         super(props);
-        this.unauthenticated = this.props.location.state.unauthenticated;
-        console.log(this.unauthenticated);
-        if (this.unauthenticated) {
-          this.apiClient = new APIClient();
-        }
-        else {
-          const accessToken = this.props.authState.accessToken.accessToken;
-          this.apiClient = new APIClient(accessToken);
-        }
+        const accessToken = this.props.authState.accessToken.accessToken;
+        this.apiClient = new APIClient(accessToken);
         this.state = {
           emotions: [],
           aggregateData: [],
@@ -139,7 +132,7 @@ class Data extends React.Component {
       return (
           <div className={styles.root}>
             <Container>
-              <EmotionNav unauthenticated={this.unauthenticated} oktaAuth={this.props.oktaAuth} apiClient={this.apiClient}></EmotionNav>
+              <EmotionNav oktaAuth={this.props.oktaAuth} apiClient={this.apiClient}></EmotionNav>
               <BlinkingCursorTextBuilder
                   textStyle={{fontWeight :"bold", fontSize : 50}}
                   style={{marginTop:"10", marginBottom :"10px"}}

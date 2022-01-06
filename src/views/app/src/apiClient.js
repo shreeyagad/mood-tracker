@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const BASE_URI = 'http://localhost:4433';
-// const BASE_URI = 'https://mood-tracker-sg.herokuapp.com';
+// const BASE_URI = 'http://localhost:4433';
+const BASE_URI = 'https://mood-tracker-sg.herokuapp.com';
 // const BASE_URI = 'http://0.0.0.0:5000';
 
 const client = axios.create({
@@ -27,13 +27,8 @@ const monthToMonthNum = {
 const offset = new Date().getTimezoneOffset();
 
 class APIClient {
-  constructor(accessToken=null) {
-    if (accessToken) {
-      this.accessToken = accessToken;
-    }
-    else {
-      this.accessToken = "00Fxtkb5hq6kcmJKw98IpZTDiPIIEm4fuOjY20kTL2";
-    }
+  constructor(accessToken) {
+    this.accessToken = accessToken;
   }
 
   createEmotion(emotion) {
@@ -51,6 +46,10 @@ class APIClient {
 
   deleteEmotion(emotion_id) {
     return this.perform('delete', `/emotions/${emotion_id}/${offset}/`);
+  }
+
+  deleteAllEmotions() {
+    return this.perform('delete', `/emotions/${offset}/`);
   }
 
   getEmotionsByDate(year, month, day) {

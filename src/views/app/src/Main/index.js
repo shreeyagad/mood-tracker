@@ -27,9 +27,9 @@ class Main extends Component {
         <Switch>
           <Route exact path="/" component={Login} />
           <Route path="/callback" component={LoginCallback} />
-          <Route path="/home" component={Home} render={(props) => <Home {...props}/>}/>
-          <Route path="/data" component={Data} render={(props) => <Data {...props}/>}/>
-          <Route path="/statistics" component={Statistics} render={(props) => <Statistics {...props}/>}/>
+          <SecureRoute path="/home" component={Home} render={(props) => <Home {...props}/>}/>
+          <SecureRoute path="/data" component={Data} render={(props) => <Data {...props}/>}/>
+          <SecureRoute path="/statistics" component={Statistics} render={(props) => <Statistics {...props}/>}/>
         </Switch>
       </Security>
     );
