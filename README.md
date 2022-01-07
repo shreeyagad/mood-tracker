@@ -1,5 +1,5 @@
 # Mood Tracker
-A web application that uses an RNN emotion classifier and data visualizations (courtesy of nivo) to analyze your mood over time. 
+A web application that uses an RNN emotion classifier and data visualizations (courtesy of nivo) to analyze your mood over time. [Link](https://mood-tracker-sg.herokuapp.com/)
 
 ## Emotion Classification
 The model is a recurrent neural network (RNN) with a linear layer added on top to serve as the classifier. Before data is fed into the model, it is tokenized, and each token is mapped to a spaCy word embedding. The data used for training, validation, and testing consist of ~10,000 tweets from Twitter, with a roughly equal label distribution across each emotion.
